@@ -7,7 +7,6 @@ root_dir = Path(__file__).parent
 sys.path.insert(0, str(root_dir))
 
 from project_platform.plugin_manager import PluginManager
-from api.models.graph import GraphBuilder
 
 
 def main():
