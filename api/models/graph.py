@@ -1,7 +1,7 @@
 from typing import Dict
 
-from node import Node
-from edge import Edge
+from api.models.node import Node  
+from api.models.edge import Edge  
 
 
 class Graph:
