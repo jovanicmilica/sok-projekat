@@ -39,7 +39,13 @@ class GraphOperations:
     def _node_matches_search(node: Node, query: str) -> bool:
         """
         Checks if node id or attribute contains query string.
-        Returns true or false.
+
+        Args:
+            node (Node): Node object which is being searched.
+            query (str): Query string for searching.
+
+        Returns:
+            bool: True if node id or attribute contains query string.
         """
         # Check node id
         if query in node.id.lower():
@@ -106,6 +112,18 @@ class GraphOperations:
     def _node_matches_filter(node: Node, attribute: str, operator: str, value: str) -> bool:
         """
         Checks if node fits the filter.
+
+        Args:
+            node (Node): Node object which is being filtered.
+            attribute (str): Attribute name.
+            operator (str): Operator (==, <=, >=, <, >, !=).
+            value (str): Value of the attribute.
+
+        Returns:
+            bool: True if node fits the filter.
+
+        Raises:
+            ValueError: If attribute is not valid.
         """
         if attribute not in node.attributes:
             return False
@@ -124,6 +142,13 @@ class GraphOperations:
         """
         Convert string to data type.
         Types: int, float, str, bool
+
+        Args:
+            value_str (str): String value to be converted.
+            example_value (any): Value of node attribute.
+
+        Returns:
+            Any: Value of attribute converted to data type.
         """
         if example_value is None:
             return value_str
@@ -155,6 +180,17 @@ class GraphOperations:
     def _apply_operator(attr_value, operator: str, filter_value) -> bool:
         """
         Apply operator to attribute.
+
+        Args:
+            attr_value (any): Value of attribute in node.
+            operator (str): Operator (==, <=, >=, <, >, !=).
+            filter_value (any): Value of attribute from filter query.
+
+        Returns:
+            bool: True if attribute fits the filter.
+
+        Raises:
+            ValueError: If operator is not valid.
         """
         if operator == "==":
             return attr_value == filter_value
@@ -175,7 +211,13 @@ class GraphOperations:
     def _build_subgraph(original: Graph, node_ids: Set[str]) -> Graph:
         """
         Create subgraph based on nodes found, add necessary edges.
-        Returns new graph object.
+
+        Args:
+            original (Graph): Graph object.
+            node_ids (Set[str]): Set of node ids in subgraph.
+
+        Returns:
+            Graph: New graph object.
         """
         # If no nodes were found, return original graph
         if not node_ids:
