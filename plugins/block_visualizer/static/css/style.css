@@ -1,0 +1,113 @@
+.block-visualizer-wrapper {
+    width: 100%;
+    height: 100%;
+    min-height: 600px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.block-visualizer-container {
+    width: 100%;
+    height: 600px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.block-visualizer-container svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Node */
+.node-rect {
+    fill: #4CAF50;
+    stroke: #333;
+    stroke-width: 2;
+    transition: stroke 0.2s ease;
+}
+
+.node-rect:hover {
+    stroke: #ff6b6b;
+}
+
+.node-rect.selected {
+    stroke: #ffd700;
+    stroke-width: 3;
+}
+
+/* Node text */
+.node-text {
+    fill: white;
+    font-size: 12px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+}
+
+.node-id {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Edge */
+.link-line {
+    stroke: #999;
+    stroke-width: 2;
+    stroke-opacity: 0.6;
+    transition: stroke 0.2s ease;
+}
+
+.link-line.directed {
+    stroke: #666;
+}
+
+.link-line:hover {
+    stroke: #ff6b6b;
+    stroke-opacity: 1;
+}
+
+.link-text {
+    font-size: 11px;
+    fill: #1e3c72;
+    font-weight: 600;
+    pointer-events: none;
+    text-shadow: 0 0 3px white, 0 0 3px white;
+    paint-order: stroke;
+    stroke: white;
+    stroke-width: 1.5px;
+    stroke-opacity: 0.8;
+}
+
+/* Style for zoom controls */
+.zoom-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+}
+
+.zoom-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.zoom-btn:hover {
+    background: #f0f0f0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
