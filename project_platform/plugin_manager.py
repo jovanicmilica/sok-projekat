@@ -4,7 +4,7 @@ import inspect
 import pkgutil
 import sys
 from pathlib import Path
-from typing import Dict, Type, Optional
+from typing import Any, Dict, List, Type, Optional
 
 from api.data_source import DataSourcePlugin
 from api.visualizer import VisualizerPlugin
@@ -142,3 +142,26 @@ class PluginManager:
     def get_all_data_plugin_names(self):
         self._load_plugins()
         return list(self._data_plugins.keys())
+    
+
+    def get_plugin_parameters(self, plugin_name: str) -> List[Dict[str, Any]]:
+        """
+        Returns the parameters specification for a given plugin.
+        It first checks if the plugin class has a 'get_parameters_spec' method.
+        """
+        self._load_plugins()
+        plugin_class = self._data_plugins.get(plugin_name)
+        
+        if plugin_class and hasattr(plugin_class, 'get_parameters_spec'):
+            return plugin_class.get_parameters_spec()
+        
+        return [
+            {
+                'name': 'file_path',
+                'type': 'string',
+                'required': True,
+                'description': f'Path to {plugin_name} data file',
+                'placeholder': f'Enter path...'
+            }
+        ]
+

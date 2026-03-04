@@ -12,3 +12,6 @@ class GraphPlatform:
 
     def get_data_source_plugins(self):
         return self.plugin_manager.get_all_data_plugin_names()
+    
+    def get_data_source_plugin_parameters(self, plugin_name: str):
+        return self.plugin_manager.get_plugin_parameters(plugin_name)

@@ -17,7 +17,7 @@
                 </span>
                 <ul class="view-mode-chooser">
                     <li>
-                        <input type="radio" id="simple-view-radio" name="view-choice" value="simple-view">
+                        <input type="radio" id="simple-view-radio" name="view-choice" value="simple-view" checked>
                         <label for="simple-view-radio">Simple View</label><br>
                     </li>
                     <li>
@@ -26,7 +26,7 @@
                     </li>
                 </ul>
                 <ul class="plugin-chooser">
-                    <select name="plugin" id="plugin-select">
+                    <select name="plugin" id="plugin-select" onchange="handlePluginSelection()">
                         <option value="none">Select datasource plugin...</option>
                     </select>
                 </ul>
