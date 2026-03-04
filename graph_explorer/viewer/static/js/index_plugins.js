@@ -104,37 +104,31 @@ function renderParameterInputs(pluginName, parameters) {
         
         if (param.type === 'boolean') {
             html += `
-                <div class="param-input" style="margin-bottom: 15px;">
-                    <label style="display: flex; align-items: center; gap: 10px; color: #e3eaff;">
+                <div class="param-input param-input-boolean">
+                    <label class="checkbox-label">
                         <input type="checkbox" id="${inputId}" name="${param.name}" 
-                               ${defaultValue ? 'checked' : ''} style="width: 18px; height: 18px;">
-                        <span>${param.name} ${param.required ? '*' : ''}</span>
+                            ${defaultValue ? 'checked' : ''} class="checkbox-input">
+                        <span class="param-name">${param.name} ${param.required ? '*' : ''}</span>
                     </label>
-                    ${param.description ? `<small style="color: #5f6f8c; display: block; margin-left: 28px;">${param.description}</small>` : ''}
                 </div>
             `;
         } else {
             html += `
-                <div class="param-input" style="margin-bottom: 15px;">
-                    <label for="${inputId}" style="display: block; color: #8f9bb5; margin-bottom: 5px;">
-                        ${param.name} ${param.required ? '*' : ''}
-                    </label>
+                <div class="param-input">
                     <input type="${param.type === 'number' ? 'number' : 'text'}" 
-                           id="${inputId}" 
-                           name="${param.name}"
-                           placeholder="${param.placeholder || `Enter ${param.name}...`}"
-                           value="${defaultValue}"
-                           ${required}
-                           style="width: 100%; background: #10161f; border: 1px solid #2b354a; 
-                                  border-radius: 12px; padding: 12px 16px; color: #e3eaff;">
-                    ${param.description ? `<small style="color: #5f6f8c; display: block; margin-top: 5px;">${param.description}</small>` : ''}
+                        id="${inputId}" 
+                        name="${param.name}"
+                        placeholder="${param.name}"
+                        value="${defaultValue}"
+                        ${required}
+                        class="param-field">
                 </div>
             `;
         }
     });
     
     html += `
-        <button class="text-btn" onclick="loadGraph()" style="width: 100%; margin-top: 15px;">
+        <button class="text-btn load-graph-btn" onclick="loadGraph()">
             Load Graph
         </button>
     </div>`;
