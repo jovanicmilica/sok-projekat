@@ -11,7 +11,11 @@ __pycache__/
 dist/
 build/
 
-.idea/workspace.xml
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+out/
 
 # VS Code settings
 .vscode/
