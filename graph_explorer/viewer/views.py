@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-
+from project_platform.core import GraphPlatform
 
 def index(request):
     """Main page"""
@@ -8,11 +8,6 @@ def index(request):
 
 def list_plugins(request):
     # Ovo treba da dobiješ iz platforme
-    plugins = [
-        "JSON Plugin",
-        "CSV Plugin", 
-        "XML Plugin",
-        "RDF Plugin"
-    ]
+    plugins = GraphPlatform().get_data_source_plugins()
     
     return JsonResponse(plugins, safe=False)  # safe=False dozvoljava listu umesto dict

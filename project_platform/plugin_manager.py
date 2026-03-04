@@ -138,3 +138,7 @@ class PluginManager:
             })
 
         return info
+    
+    def get_all_data_plugin_names(self):
+        self._load_plugins()
+        return list(self._data_plugins.keys())
