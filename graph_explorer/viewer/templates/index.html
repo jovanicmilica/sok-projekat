@@ -4,15 +4,74 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Viewer</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+<!--    {% load static %}-->
+<!--    <link rel="stylesheet" href="{% static 'css/style.css' %}" />-->
+      <link rel="stylesheet" href="../../../graph_explorer/viewer/static/css/style.css" />
   </head>
   <body>
-    <div class="container">
-      <h1>Viewer</h1>
-      <p>{{ message }}</p>
+    <div class="app-container">
+        <div class="header">
+            <div class="view-chooser">
+                <span class="title">
+                    Graph Visualizer
+                </span>
+                <ul>
+                    <li>
+                        <input type="radio" id="simple-view-radio" name="view-choice" value="simple-view">
+                        <label for="simple-view-radio">Simple View</label><br>
+                    </li>
+                    <li>
+                        <input type="radio" id="block-view-radio" name="view-choice" value="block-view">
+                        <label for="block-view-radio">Block View</label><br>
+                    </li>
+                </ul>
+            </div>
+            <div class="filters-container">
+                <div class="file-input-container">
+                    <input type="text" id="file-input" placeholder="Enter graph file path...">
+                    <button class="text-btn">Enter</button>
+                </div>
+                <div class="search-input-container">
+                    <input type="text" id="word-search-input" placeholder="Search...">
+                    <button class="text-btn" onclick="addSearch()">Search</button>
+                </div>
+                <div class="filter-container">
+                    <input type="text" id="attribute-name-input" placeholder="Enter attribute name...">
+                    <select id="relation-input" name="relation-input">
+                      <option value="=">=</option>
+                      <option value=">=">>=</option>
+                      <option value=">">></option>
+                      <option value="<"><</option>
+                      <option value="<="><=</option>
+                    </select>
+                    <input type="text" id="attribute-value-input" placeholder="Enter attribute value...">
+                    <button class="text-btn" onclick="addFilter()">Apply</button>
+                </div>
+                <div class="applied-filters-container">
+                    <span>Applied filters</span>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="views-container">
+            <div class="left-column-views">
+                <div class="tree-view-container">
+
+                </div>
+                <div class="bird-view-container">
+
+                </div>
+            </div>
+            <div class="right-column-views">
+                <div class="main-view-container">
+
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="{% static 'js/main.js' %}"></script>
+    <!-- <script src="{% static 'js/main.js' %}"></script> -->
+     <script src="../../../graph_explorer/viewer/static/js/main.js"></script>
+  
   </body>
 </html>
