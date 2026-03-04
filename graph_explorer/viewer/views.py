@@ -31,30 +31,40 @@ def get_data_plugin_parameters(request, plugin_name):
 @csrf_exempt
 @require_http_methods(["POST"])
 def load_graph(request):
-    # receive data from the frontend
-    data = json.loads(request.body)
-    plugin_name = data.get('plugin')
-    parameters = data.get('parameters', {})
-    
-    print(f"Primljen plugin: {plugin_name}")
-    print(f"Primljeni parametri: {parameters}")
-    
-    # Load the graph using the specified plugin and parameters
-    platform = GraphPlatform()
     try:
-        graph = platform.load_graph(plugin_name, **parameters)
+        data = json.loads(request.body)
+        
+        data_source = data.get('plugin')
+        visualizer = data.get('visualizer', 'simple-view')
+        parameters = data.get('parameters', {})
+        
+        platform = GraphPlatform()
+        
+        graph = platform.load_graph(
+            data_source_plugin_name=data_source,
+            visualizer_plugin_name=visualizer,
+            **parameters
+        )
         
         node_count = len(graph.nodes) if graph and hasattr(graph, 'nodes') else 0
         edge_count = len(graph.edges) if graph and hasattr(graph, 'edges') else 0
-        
+                
         return JsonResponse({
             'status': 'success',
-            'message': f'Graph loaded successfully with plugin: {plugin_name}',
-            'plugin': plugin_name,
+            'message': f'Graph loaded with {data_source}',
+            'visualizer': visualizer,
             'node_count': node_count,
-            'edge_count': edge_count,
-            'received_params': parameters
+            'edge_count': edge_count
         })
+        
     except Exception as e:
+        import traceback
+        traceback.print_exc()  
         return JsonResponse({'error': str(e)}, status=500)
+    
+def list_visualizers(request):
+    platform = GraphPlatform()
+    visualizers = platform.get_visualizer_plugins()
+    return JsonResponse(visualizers, safe=False)
+
     

@@ -1,20 +1,26 @@
 function loadGraph() {
     const selectElement = document.getElementById('plugin-select');
-    const pluginName = selectElement.value;
+    const dataSource = selectElement.value;
     
-    if (!pluginName || pluginName === 'none') {
+    const visualizer = document.querySelector('input[name="view-choice"]:checked').value;
+    
+    if (!dataSource || dataSource === 'none') {
         alert('Please select a plugin first');
         return;
     }
     
     const params = {};
-    
     document.querySelectorAll('.param-field').forEach(input => {
         params[input.name] = input.value;
     });
-    
     document.querySelectorAll('.checkbox-input').forEach(checkbox => {
         params[checkbox.name] = checkbox.checked;
+    });
+    
+    console.log('Sending:', {
+        plugin: dataSource,
+        visualizer: visualizer,
+        parameters: params
     });
     
     fetch('/api/load-graph/', {
@@ -23,7 +29,8 @@ function loadGraph() {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            plugin: pluginName,
+            plugin: dataSource,
+            visualizer: visualizer,
             parameters: params
         })
     })
@@ -32,10 +39,11 @@ function loadGraph() {
         if (data.error) {
             alert(`Error: ${data.error}`);
         } else {
-            alert(`Graph loaded successfully!\nNodes: ${data.node_count}\nEdges: ${data.edge_count}`);
+            alert(`Graph loaded!\nNodes: ${data.node_count}\nEdges: ${data.edge_count}`);
         }
     })
     .catch(error => {
+        console.error('Error:', error);
         alert('Error loading graph');
     });
 }
