@@ -1,91 +1,78 @@
+import json
+from typing import Dict, List, Any
 from api.visualizer import VisualizerPlugin
 from api.models.graph import Graph
 from datetime import date
-import json
-from typing import Dict, List, Any
 import os
 
 
 class BlockVisualizer(VisualizerPlugin):
-    """
-    Visualizer represents nodes as blocks with their attributes listed inside,
-    and edges as lines connecting the blocks.
-    """
-
-    def get_name(self) -> str:
-        return "Block Visualizer"
+    plugin_name = "block_visualizer"
 
     def render(self, graph: Graph) -> str:
-        if not graph or not graph.nodes:
-            return self._render_empty_graph()
+        # Load files
+        current_dir = os.path.dirname(os.path.abspath(__file__))
 
+        # CSS
+        css_path = os.path.join(current_dir, 'static', 'css', 'style.css')
+        with open(css_path, 'r', encoding='utf-8') as f:
+            css_content = f.read()
+
+        # JS
+        js_path = os.path.join(current_dir, 'static', 'js', 'visualization.js')
+        with open(js_path, 'r', encoding='utf-8') as f:
+            js_content = f.read()
+
+        # HTML template
+        html_path = os.path.join(current_dir, 'templates', 'base.html')
+        with open(html_path, 'r', encoding='utf-8') as f:
+            html_template = f.read()
+
+        # Prepare data
         nodes_data = self._prepare_nodes_data(graph)
         edges_data = self._prepare_edges_data(graph)
 
-        return self._generate_html(nodes_data, edges_data)
+        graph_data = {
+            'nodes': nodes_data,
+            'edges': edges_data
+        }
 
-    def _render_empty_graph(self) -> str:
-        return """
-        <div class="alert alert-info" style="padding: 20px; text-align: center;">
-            <h3>Graph is empty</h3>
-            <p>There are no nodes or edges to display. Please add some data to visualize.</p>
-        </div>
-        """
-
-    def _prepare_nodes_data(self, graph: Graph) -> List[Dict[str, Any]]:
-        nodes_data = []
-        for node_id, node in graph.nodes.items():
-            attrs_for_display = {}
-            for key, value in node.attributes.items():
-                if isinstance(value, date):
-                    attrs_for_display[key] = value.isoformat()
-                else:
-                    attrs_for_display[key] = str(value)
-
-            nodes_data.append({
-                "id": node_id,
-                "attributes": attrs_for_display,
-                "x": 0,
-                "y": 0,
-                "height": 40 + (len(attrs_for_display) * 20)
-            })
-        return nodes_data
-
-    def _prepare_edges_data(self, graph: Graph) -> List[Dict[str, Any]]:
-        edges_data = []
-        for edge_id, edge in graph.edges.items():
-            edges_data.append({
-                "id": edge_id,
-                "source": edge.source,
-                "target": edge.target,
-                "directed": graph.directed,
-                "attributes": {k: str(v) for k, v in edge.attributes.items()}
-            })
-        return edges_data
-
-    def _generate_html(self, nodes: List[Dict], edges: List[Dict]) -> str:
-        # Convert nodes and edges to JSON strings
-        nodes_json = json.dumps(nodes, ensure_ascii=False)
-        edges_json = json.dumps(edges, ensure_ascii=False)
-
-        # Load HTML template
-        template_path = os.path.join(os.path.dirname(
-            __file__), 'templates', 'base.html')
-
-        try:
-            with open(template_path, 'r', encoding='utf-8') as f:
-                template = f.read()
-        except FileNotFoundError:
-            return f"<pre>Error loading template: {template_path} not found.</pre>"
-
-        html = template.replace('{{ NODES_JSON }}', nodes_json)
-        html = html.replace('{{ EDGES_JSON }}', edges_json)
-
-        # Extract only the body content (remove <html>, <head>, <body> tags)
-        # Find content between <body> and </body>
-        import re
-        body_match = re.search(r'<body[^>]*>(.*?)</body>', html, re.DOTALL)
-        if body_match:
-            return body_match.group(1)
+        # Replace placeholders
+        html = html_template.replace('{{CSS_CONTENT}}', css_content)
+        html = html.replace('{{JS_CONTENT}}', js_content)
+        html = html.replace('{{GRAPH_DATA}}', json.dumps(graph_data))
 
         return html
+
+    def _prepare_nodes_data(self, graph: Graph) -> List[Dict[str, Any]]:
+        nodes = []
+        for node_id, node in graph.nodes.items():
+            attributes = {}
+            for key, value in node.attributes.items():
+                if isinstance(value, date):
+                    attributes[key] = value.isoformat()
+                else:
+                    attributes[key] = str(value)
+
+            node_data = {
+                'id': node_id,
+                'attributes': attributes,
+                'height': 50 + (len(attributes) * 20)
+            }
+            nodes.append(node_data)
+        return nodes
+
+    def _prepare_edges_data(self, graph: Graph) -> List[Dict[str, Any]]:
+        edges = []
+        for edge_id, edge in graph.edges.items():
+            edges.append({
+                'id': edge_id,
+                'source': edge.source,
+                'target': edge.target,
+                'directed': graph.directed,
+                'attributes': {k: str(v) for k, v in edge.attributes.items()}
+            })
+        return edges
+
+    def get_name(self) -> str:
+        return self.plugin_name

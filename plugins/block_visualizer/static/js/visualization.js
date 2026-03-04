@@ -1,199 +1,269 @@
-(function() {
-    // take data
-    const nodes = window.__graphData.nodes;
-    const edges = window.__graphData.edges;
+class BlockVisualizer {
+    constructor(data) {
+        this.data = data;
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.nodeWidth = 160;
+        this.tooltip = null;
 
-    // setup
-    const container = document.querySelector('.block-visualizer-container');
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+        this.init();
+    }
 
-    const svg = d3.select(".block-visualizer-container svg");
-    svg.selectAll("*").remove();
+    init() {
+        this.linkEdges();
+        this.setInitialPositions();
+        this.createTooltip();
 
-    // arrows for directed edges
-    svg.append("defs").append("marker")
-        .attr("id", "arrowhead-block")
-        .attr("viewBox", "-0 -5 10 10")
-        .attr("refX", 25)
-        .attr("refY", 0)
-        .attr("orient", "auto")
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 6)
-        .attr("xoverflow", "visible")
-        .append("svg:path")
-        .attr("d", "M 0,-5 L 10 ,0 L 0,5")
-        .attr("fill", "#999")
-        .style("stroke", "none");
+        this.svg = d3.select("#graph")
+            .append("svg")
+            .attr("width", this.width)
+            .attr("height", this.height)
+            .call(d3.zoom()
+                .scaleExtent([0.2, 4])
+                .on("zoom", (e) => this.zoomed(e))
+            )
+            .append("g");
 
-    // zoom and pan
-    const g = svg.append("g").attr("class", "zoom-group");
+        this.svg.append("defs").append("marker")
+            .attr("id", "arrow")
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 20)
+            .attr("refY", 0)
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5")
+            .attr("fill", "#999");
 
-    const zoom = d3.zoom()
-        .scaleExtent([0.1, 4])
-        .on("zoom", (event) => {
-            g.attr("transform", event.transform);
-        });
+        this.simulation = d3.forceSimulation(this.data.nodes)
+            .force("link", d3.forceLink(this.data.edges)
+                .id(d => d.id)
+                .distance(400)
+                .strength(0.3)
+            )
+            .force("charge", d3.forceManyBody().strength(-400))
+            .force("center", d3.forceCenter(this.width / 2, this.height / 2))
+            .force("collision", d3.forceCollide().radius(90))
+            .alphaDecay(0.02)
+            .velocityDecay(0.4);
 
-    svg.call(zoom);
+        this.draw();
+        this.simulation.on("tick", () => this.tick());
 
-    // force simulation
-    const simulation = d3.forceSimulation(nodes)
-        .force("link", d3.forceLink(edges)
-            .id(d => d.id)
-            .distance(300)
-        )
-        .force("charge", d3.forceManyBody().strength(-500))
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collision", d3.forceCollide().radius(d => d.height / 2 + 20))
-        .force("x", d3.forceX(width / 2).strength(0.05))
-        .force("y", d3.forceY(height / 2).strength(0.05));
+        window.viz = this;
+    }
 
-    // edges - lines
-    const link = g.append("g")
-        .attr("class", "links")
-        .selectAll("line")
-        .data(edges)
-        .enter().append("line")
-        .attr("class", d => d.directed ? "link-line directed" : "link-line")
-        .attr("marker-end", d => d.directed ? "url(#arrowhead-block)" : null);
+    createTooltip() {
+        d3.select("#edge-tooltip").remove();
 
-    // edges - labels (edge attributes)
-    const linkText = g.append("g")
-        .attr("class", "link-labels")
-        .selectAll("text")
-        .data(edges)
-        .enter().append("text")
-        .attr("class", "link-text")
-        .attr("text-anchor", "middle")
-        .attr("dy", -5)
-        .attr("font-size", "9px")
-        .attr("fill", "#333")
-        .attr("stroke", "white")
-        .attr("stroke-width", "0.5")
-        .text(d => {
-            // Show edge attributes
-            if (d.attributes) {
-                if (d.attributes.type) return d.attributes.type;
-                if (d.attributes.odnos) return d.attributes.odnos;
-                // Show first attribute if exists
-                const firstKey = Object.keys(d.attributes)[0];
-                if (firstKey) return d.attributes[firstKey];
+        this.tooltip = d3.select("body")
+            .append("div")
+            .attr("id", "edge-tooltip")
+            .style("position", "absolute")
+            .style("background", "#fff")
+            .style("color", "#333")
+            .style("padding", "10px 14px")
+            .style("border-radius", "6px")
+            .style("font-size", "12px")
+            .style("pointer-events", "none")
+            .style("z-index", "1000")
+            .style("border", "1px solid #ccc")
+            .style("box-shadow", "0 2px 10px rgba(0,0,0,0.1)")
+            .style("display", "none")
+            .style("max-width", "300px")
+            .style("line-height", "1.5");
+    }
+
+    showEdgeTooltip(event, d) {
+        let html = `<strong style="font-size:13px;">Edge: ${d.id}</strong><br>`;
+        html += `<span style="color:#666;">Directed: ${d.directed ? 'Yes' : 'No'}</span><br>`;
+        html += `<span style="color:#666;">Source: ${d.source.id}</span><br>`;
+        html += `<span style="color:#666;">Target: ${d.target.id}</span>`;
+
+        if (d.attributes && Object.keys(d.attributes).length > 0) {
+            html += `<br><hr style="margin:6px 0; border:1px solid #eee;">`;
+            html += `<span style="font-weight:500;">Attributes:</span><br>`;
+            for (let [key, value] of Object.entries(d.attributes)) {
+                html += `<span style="color:#666;">${key}: ${value}</span><br>`;
             }
-            return "";
+        }
+
+        this.tooltip
+            .style("display", "block")
+            .style("left", (event.pageX + 15) + "px")
+            .style("top", (event.pageY - 30) + "px")
+            .html(html);
+    }
+
+    hideEdgeTooltip() {
+        this.tooltip.style("display", "none");
+    }
+
+    linkEdges() {
+        const nodeMap = new Map();
+        this.data.nodes.forEach(node => nodeMap.set(node.id, node));
+
+        this.data.edges = this.data.edges.map(edge => ({
+            ...edge,
+            source: nodeMap.get(edge.source),
+            target: nodeMap.get(edge.target)
+        })).filter(edge => edge.source && edge.target);
+    }
+
+    setInitialPositions() {
+        const centerX = this.width / 2;
+        const centerY = this.height / 2;
+        const radius = Math.min(this.width, this.height) * 0.3;
+
+        this.data.nodes.forEach((node, i) => {
+            const angle = (i / this.data.nodes.length) * 2 * Math.PI;
+            node.x = centerX + radius * Math.cos(angle);
+            node.y = centerY + radius * Math.sin(angle);
         });
+    }
 
-    // nodes
-    const node = g.append("g")
-        .attr("class", "nodes")
-        .selectAll(".node-group")
-        .data(nodes)
-        .enter().append("g")
-        .attr("class", "node-group")
-        .attr("data-node-id", d => d.id)
-        .call(d3.drag()
-            .on("start", dragStarted)
-            .on("drag", dragged)
-            .on("end", dragEnded));
+    draw() {
+        this.edges = this.svg.append("g")
+            .selectAll("line")
+            .data(this.data.edges)
+            .enter()
+            .append("line")
+            .attr("class", "edge-line")
+            .attr("marker-end", d => d.directed ? "url(#arrow)" : null)
+            .style("stroke", "#999")
+            .style("stroke-width", "2")
+            .style("stroke-opacity", "0.6")
+            .on("mouseover", (event, d) => this.showEdgeTooltip(event, d))
+            .on("mousemove", (event) => {
+                this.tooltip
+                    .style("left", (event.pageX + 15) + "px")
+                    .style("top", (event.pageY - 30) + "px");
+            })
+            .on("mouseout", () => this.hideEdgeTooltip());
 
-    // rectangle for each node
-    node.append("rect")
-        .attr("class", "node-rect")
-        .attr("width", d => 160)
-        .attr("height", d => d.height)
-        .attr("x", -80)
-        .attr("y", d => -d.height / 2)
-        .attr("rx", 8)
-        .attr("ry", 8);
+        this.edgeLabels = this.svg.append("g")
+            .selectAll("text")
+            .data(this.data.edges)
+            .enter()
+            .append("text")
+            .style("font-size", "10px")
+            .style("fill", "#333")
+            .style("text-anchor", "middle")
+            .style("paint-order", "stroke")
+            .style("stroke", "white")
+            .style("stroke-width", "2px")
+            .text(d => d.attributes?.tip || d.attributes?.type || '');
 
-    // ID node
-    node.append("text")
-        .attr("class", "node-text node-id")
-        .attr("x", 0)
-        .attr("y", d => -d.height / 2 + 20)
-        .text(d => d.id);
+        this.nodes = this.svg.append("g")
+            .selectAll("g")
+            .data(this.data.nodes)
+            .enter()
+            .append("g")
+            .attr("class", "node-group")
+            .call(d3.drag()
+                .on("start", (e, d) => this.dragStart(e, d))
+                .on("drag", (e, d) => this.drag(e, d))
+                .on("end", (e, d) => this.dragEnd(e, d))
+            );
 
-    // Attributes
-    node.each(function(d) {
-        const group = d3.select(this);
-        const attrs = d.attributes;
-        let yOffset = -d.height / 2 + 40;
+        this.nodes.append("rect")
+            .attr("width", this.nodeWidth)
+            .attr("height", d => d.height)
+            .attr("x", -this.nodeWidth/2)
+            .attr("y", d => -d.height/2)
+            .attr("rx", 4)
+            .attr("ry", 4)
+            .style("fill", "#4CAF50")
+            .style("stroke", "#333")
+            .style("stroke-width", "2");
 
-        Object.entries(attrs).forEach(([key, value]) => {
-            const displayValue = value.length > 15 ? value.substring(0, 12) + '...' : value;
+        this.nodes.append("text")
+            .attr("class", "node-id")
+            .attr("x", 0)
+            .attr("y", d => -d.height/2 + 18)
+            .style("fill", "white")
+            .style("font-size", "12px")
+            .style("font-weight", "bold")
+            .style("text-anchor", "middle")
+            .text(d => d.id);
 
-            group.append("text")
-                .attr("class", "node-text")
-                .attr("x", 0)
-                .attr("y", yOffset)
-                .text(`${key}: ${displayValue}`);
-            yOffset += 18;
+        this.nodes.each(function(d) {
+            const group = d3.select(this);
+            const attrs = d.attributes;
+            let yPos = -d.height/2 + 38;
+
+            Object.entries(attrs).forEach(([key, value]) => {
+                const shortValue = String(value).length > 15
+                    ? String(value).substring(0, 12) + '...'
+                    : value;
+
+                group.append("text")
+                    .attr("x", 0)
+                    .attr("y", yPos)
+                    .style("fill", "white")
+                    .style("font-size", "10px")
+                    .style("text-anchor", "middle")
+                    .text(`${key}: ${shortValue}`);
+
+                yPos += 18;
+            });
         });
-    });
-
-    // interactions
-    node.on("click", function(event, d) {
-        event.stopPropagation();
-
-        d3.selectAll(".node-rect").classed("selected", false);
-        d3.select(this).select(".node-rect").classed("selected", true);
-
-        window.dispatchEvent(new CustomEvent('nodeSelected', {
-            detail: { nodeId: d.id }
-        }));
-    });
-
-    // click on background to deselect
-    svg.on("click", function() {
-        d3.selectAll(".node-rect").classed("selected", false);
-        window.dispatchEvent(new CustomEvent('nodeDeselected'));
-    });
-
-    // drag
-    function dragStarted(event, d) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
     }
 
-    function dragged(event, d) {
-        d.fx = event.x;
-        d.fy = event.y;
-    }
-
-    function dragEnded(event, d) {
-        if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-    }
-
-    // tick - update positions for links, link labels and nodes
-    simulation.on("tick", () => {
-        link
+    tick() {
+        this.edges
             .attr("x1", d => d.source.x)
             .attr("y1", d => d.source.y)
             .attr("x2", d => d.target.x)
             .attr("y2", d => d.target.y);
 
-        linkText
+        this.edgeLabels
             .attr("x", d => (d.source.x + d.target.x) / 2)
             .attr("y", d => (d.source.y + d.target.y) / 2);
 
-        node.attr("transform", d => `translate(${d.x},${d.y})`);
-    });
+        this.nodes
+            .attr("transform", d => `translate(${d.x},${d.y})`);
+    }
 
-    // resize
-    window.addEventListener('resize', () => {
-        const newWidth = container.clientWidth;
-        const newHeight = container.clientHeight;
+    zoomed(e) {
+        this.svg.attr("transform", e.transform);
+    }
 
-        svg.attr("width", newWidth).attr("height", newHeight);
-        simulation.force("center", d3.forceCenter(newWidth / 2, newHeight / 2));
-        simulation.alpha(0.3).restart();
-    });
+    dragStart(e, d) {
+        if (!e.active) this.simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
 
-    // initial zoom
-    setTimeout(() => {
-        svg.call(zoom.transform, d3.zoomIdentity.translate(50, 50).scale(0.8));
-    }, 100);
-})();
+    drag(e, d) {
+        d.fx = e.x;
+        d.fy = e.y;
+    }
+
+    dragEnd(e, d) {
+        if (!e.active) this.simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+
+    zoomIn() {
+        d3.select("svg").transition().duration(300).call(d3.zoom().scaleBy, 1.2);
+    }
+
+    zoomOut() {
+        d3.select("svg").transition().duration(300).call(d3.zoom().scaleBy, 0.8);
+    }
+
+    reset() {
+        d3.select("svg").transition().duration(300).call(d3.zoom().transform, d3.zoomIdentity);
+        this.setInitialPositions();
+        this.simulation.alpha(0.3).restart();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof graphData !== 'undefined') {
+        new BlockVisualizer(graphData);
+    }
+});

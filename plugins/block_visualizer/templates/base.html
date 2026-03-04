@@ -1,25 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Block Visualizer</title>
-    <link rel="stylesheet" href="static/css/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        {{CSS_CONTENT}}
+    </style>
 </head>
 <body>
-    <div class="block-visualizer-wrapper">
-        <div class="block-visualizer-container">
-            <svg></svg>
-        </div>
-    </div>
+    <div id="graph"></div>
 
     <script>
-        window.__graphData = {
-            nodes: {{ NODES_JSON }},
-            edges: {{ EDGES_JSON }}
-        };
+        const graphData = {{GRAPH_DATA}};
+        {{JS_CONTENT}}
     </script>
-
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="static/js/visualization.js"></script>
 </body>
 </html>
