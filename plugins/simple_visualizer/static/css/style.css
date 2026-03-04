@@ -1,0 +1,98 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    overflow: hidden;
+}
+
+#graph {
+    width: 100vw;
+    height: 100vh;
+    background-color: #f8f9fa;
+}
+
+/* Node styles */
+.node {
+    cursor: move;
+}
+
+.node circle {
+    fill: #69b3a2;
+    stroke: #fff;
+    stroke-width: 2px;
+    transition: all 0.2s;
+}
+
+.node:hover circle {
+    fill: #ff7f0e;
+    stroke-width: 3px;
+}
+
+.node text {
+    font-size: 12px;
+    font-weight: 500;
+    fill: #333;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+    text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+}
+
+/* Edge styles */
+.edge {
+    stroke: #999;
+    stroke-width: 1.5px;
+    stroke-opacity: 0.6;
+}
+
+.edge:hover {
+    stroke: #ff7f0e;
+    stroke-width: 2.5px;
+    stroke-opacity: 1;
+}
+
+/* Tooltip */
+.tooltip {
+    position: fixed;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 1000;
+    max-width: 250px;
+    word-wrap: break-word;
+    transition: opacity 0.2s;
+}
+
+.tooltip.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tooltip .title {
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #69b3a2;
+}
+
+.tooltip hr {
+    border: none;
+    border-top: 1px solid #444;
+    margin: 6px 0;
+}
+
+.tooltip table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tooltip td {
+    padding: 2px 0;
+}
+
+.tooltip td:first-child {
+    color: #aaa;
+    padding-right: 10px;
+}
