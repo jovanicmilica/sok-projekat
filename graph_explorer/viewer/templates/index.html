@@ -15,7 +15,7 @@
                 <span class="title">
                     Graph Visualizer
                 </span>
-                <ul>
+                <ul class="view-mode-chooser">
                     <li>
                         <input type="radio" id="simple-view-radio" name="view-choice" value="simple-view">
                         <label for="simple-view-radio">Simple View</label><br>
@@ -24,6 +24,11 @@
                         <input type="radio" id="block-view-radio" name="view-choice" value="block-view">
                         <label for="block-view-radio">Block View</label><br>
                     </li>
+                </ul>
+                <ul class="plugin-chooser">
+                    <select name="plugin" id="plugin-select">
+                        <option value="none">Select datasource plugin...</option>
+                    </select>
                 </ul>
             </div>
             <div class="filters-container">

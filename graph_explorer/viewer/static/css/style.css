@@ -97,6 +97,49 @@ button:hover {
     font-weight: 500;
 }
 
+/* ----- Plugin Chooser ----- */
+.plugin-chooser {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    background: #1a212e;
+    border-radius: 40px;
+    border: 1px solid #2b3447;
+    padding: 0; /* Remove default padding */
+}
+
+.plugin-chooser select {
+    background: transparent;
+    border: none;
+    color: #ccdfff;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    min-width: 220px;
+}
+
+.plugin-chooser select:hover {
+    background-color: #1a2436;
+    border-color: #3d4e72;
+}
+
+.plugin-chooser select:focus {
+    outline: none;
+    border-color: #6d8ae0;
+    box-shadow: 0 0 0 2px rgba(109, 138, 224, 0.3);
+}
+
+.plugin-chooser select option {
+    background: #1a212e;
+    color: #e3eaff;
+    padding: 10px;
+}
+
+/* Stil za placeholder opciju (none) */
+.plugin-chooser select option[value="none"] {
+    color: #8f9bb5;
+}
+
 /* ===== FILTERS SECTION ===== */
 .filters-container {
     background: #1a212e;
