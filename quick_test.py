@@ -1,4 +1,4 @@
-from plugins.simple_visualizer.simple_visualizer import SimpleVisualizer
+from plugins.simple_visualizer import SimpleVisualizer
 from api.models.graph import GraphBuilder
 import webbrowser
 import tempfile

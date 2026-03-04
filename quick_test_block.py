@@ -1,4 +1,4 @@
-from plugins.block_visualizer.block_visualizer import BlockVisualizer
+from plugins.block_visualizer import BlockVisualizer
 from api.models.graph import GraphBuilder
 import webbrowser
 import tempfile

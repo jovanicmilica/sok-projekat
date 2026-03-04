@@ -4,7 +4,7 @@ JSON Data Source Plugin for Graph Visualization Platform.
 This plugin provides functionality to load graph data from JSON files.
 """
 
-from .json_plugin import JSONSource
+from plugins.json_data_source_plugin.json_plugin.json_plugin import JSONSource
 
 # Explicitly export the main class
 __all__ = ['JSONSource']
