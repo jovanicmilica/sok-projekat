@@ -16,9 +16,9 @@
                 <span class="title">
                     Graph Visualizer
                 </span>
-                <ul>
+                <ul class="view-mode-chooser">
                     <li>
-                        <input type="radio" id="simple-view-radio" name="view-choice" value="simple-view">
+                        <input type="radio" id="simple-view-radio" name="view-choice" value="simple-view" checked>
                         <label for="simple-view-radio">Simple View</label><br>
                     </li>
                     <li>
@@ -26,11 +26,15 @@
                         <label for="block-view-radio">Block View</label><br>
                     </li>
                 </ul>
+                <ul class="plugin-chooser">
+                    <select name="plugin" id="plugin-select" onchange="handlePluginSelection()">
+                        <option value="none">Select datasource plugin...</option>
+                    </select>
+                </ul>
             </div>
             <div class="filters-container">
                 <div class="file-input-container">
-                    <input type="text" id="file-input" placeholder="Enter graph file path...">
-                    <button class="text-btn">Enter</button>
+                    
                 </div>
                 <div class="search-input-container">
                     <input type="text" id="word-search-input" placeholder="Search...">
@@ -72,9 +76,11 @@
         </div>
     </div>
 
-    <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/tree_view.js' %}"></script>
     <!-- <script src="../../../graph_explorer/viewer/static/js/main.js"></script> -->
+    <script src="{% static 'js/index_filters.js' %}"></script>
+    <script src="{% static 'js/index_plugins.js' %}"></script>
+     <!-- <script src="../../../graph_explorer/viewer/static/js/index_filters.js"></script> -->
   
   </body>
 </html>

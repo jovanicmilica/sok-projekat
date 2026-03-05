@@ -1,6 +1,6 @@
 import yaml
 import os
-from typing import Type, Dict
+from typing import Any, List, Type, Dict
 
 from api.data_source import DataSourcePlugin
 from api.models.graph import Graph
@@ -126,3 +126,43 @@ class YAMLSource(DataSourcePlugin):
         Return the name of the data source plugin
         """
         return self.plugin_name
+
+    @classmethod
+    def get_parameters_spec(cls) -> List[Dict[str, Any]]:
+        """
+        Returns the parameter specification for this plugin.
+        
+        Returns:
+            List of parameter definitions, each containing:
+            - name: parameter name
+            - type: parameter type (string, boolean, integer, etc.)
+            - required: whether the parameter is required
+            - default: default value (if any)
+            - description: human-readable description
+            - placeholder: placeholder text for input field
+        """
+        return [
+            {
+                'name': 'yaml_path',
+                'type': 'string',
+                'required': True,
+                'description': 'Path to the YAML file containing graph data',
+                'placeholder': '/path/to/graph.yaml'
+            },
+            {
+                'name': 'directed',
+                'type': 'boolean',
+                'required': False,
+                'default': True,
+                'description': 'Whether the graph should be directed or undirected',
+                'placeholder': 'true'
+            },
+            {
+                'name': 'encoding',
+                'type': 'string',
+                'required': False,
+                'default': 'utf-8',
+                'description': 'File encoding (e.g., utf-8, latin-1)',
+                'placeholder': 'utf-8'
+            }
+        ]

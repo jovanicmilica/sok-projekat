@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, Type
+from typing import Dict, Type, List, Any
 
 from api.data_source import DataSourcePlugin
 from api.models.graph import Graph
@@ -17,6 +17,46 @@ class JSONSource(DataSourcePlugin):
 
     def __init__(self, graph_builder_class: Type[GraphBuilder]):
         self.graph_builder_class = graph_builder_class
+
+    @classmethod
+    def get_parameters_spec(cls) -> List[Dict[str, Any]]:
+        """
+        Returns the parameter specification for this plugin.
+        
+        Returns:
+            List of parameter definitions, each containing:
+            - name: parameter name
+            - type: parameter type (string, boolean, integer, etc.)
+            - required: whether the parameter is required
+            - default: default value (if any)
+            - description: human-readable description
+            - placeholder: placeholder text for input field
+        """
+        return [
+            {
+                'name': 'json_path',
+                'type': 'string',
+                'required': True,
+                'description': 'Path to the JSON file containing graph data',
+                'placeholder': '/path/to/graph.json'
+            },
+            {
+                'name': 'directed',
+                'type': 'boolean',
+                'required': False,
+                'default': True,
+                'description': 'Whether the graph should be directed or undirected',
+                'placeholder': 'true'
+            },
+            {
+                'name': 'encoding',
+                'type': 'string',
+                'required': False,
+                'default': 'utf-8',
+                'description': 'File encoding (e.g., utf-8, latin-1)',
+                'placeholder': 'utf-8'
+            }
+        ]
 
     def parse(self, json_path: str, directed: bool = True, encoding: str = "utf-8", **kwargs) -> Graph:
         """

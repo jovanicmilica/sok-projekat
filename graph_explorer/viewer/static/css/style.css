@@ -1,4 +1,3 @@
-/* ===== RESET & BASE STYLES ===== */
 * {
     margin: 0;
     padding: 0;
@@ -15,7 +14,6 @@ body {
     padding: 20px;
 }
 
-/* ===== MAIN CONTAINER ===== */
 .app-container {
     max-width: 1600px;
     width: 100%;
@@ -25,12 +23,10 @@ body {
     padding: 24px;
 }
 
-/* ===== HEADER SECTION ===== */
 .header {
     margin-bottom: 24px;
 }
 
-/* ----- Buttons ----- */
 button.text-btn {
     width: 100px;
     background: #252e3f;
@@ -48,7 +44,6 @@ button:hover {
     border-color: #5f7bbf;
 }
 
-/* ----- View Chooser (Radio buttons) ----- */
 .view-chooser {
     display: flex;
     align-items: center;
@@ -97,7 +92,48 @@ button:hover {
     font-weight: 500;
 }
 
-/* ===== FILTERS SECTION ===== */
+.plugin-chooser {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    background: #1a212e;
+    border-radius: 40px;
+    border: 1px solid #2b3447;
+    padding: 0;
+}
+
+.plugin-chooser select {
+    background: transparent;
+    border: none;
+    color: #ccdfff;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    min-width: 220px;
+    padding: 8px 16px;
+}
+
+.plugin-chooser select:hover {
+    background-color: #1a2436;
+    border-color: #3d4e72;
+}
+
+.plugin-chooser select:focus {
+    outline: none;
+    border-color: #6d8ae0;
+    box-shadow: 0 0 0 2px rgba(109, 138, 224, 0.3);
+}
+
+.plugin-chooser select option {
+    background: #1a212e;
+    color: #e3eaff;
+    padding: 10px;
+}
+
+.plugin-chooser select option[value="none"] {
+    color: #8f9bb5;
+}
+
 .filters-container {
     background: #1a212e;
     border: 1px solid #2b3447;
@@ -105,7 +141,6 @@ button:hover {
     padding: 20px;
 }
 
-/* ----- File Input Row ----- */
 .file-input-container,
 .search-input-container {
     display: flex;
@@ -113,11 +148,11 @@ button:hover {
     margin-bottom: 16px;
 }
 
-/* ----- Input Fields & Select ----- */
 .file-input-container input,
 .search-input-container input,
 .filter-container input,
-.filter-container select {
+.filter-container select,
+.param-field {
     background: #10161f;
     border: 1px solid #2b354a;
     border-radius: 12px;
@@ -125,15 +160,37 @@ button:hover {
     color: #e3eaff;
     font-size: 0.95rem;
     flex: 1;
+    transition: all 0.2s ease;
+}
+
+.file-input-container input:hover,
+.search-input-container input:hover,
+.filter-container input:hover,
+.filter-container select:hover,
+.param-field:hover {
+    border-color: #3f5270;
+    background: #141c2a;
+}
+
+.file-input-container input:focus,
+.search-input-container input:focus,
+.filter-container input:focus,
+.filter-container select:focus,
+.param-field:focus {
+    outline: none;
+    border-color: #6d8ae0;
+    background: #1a2436;
+    box-shadow: 0 0 0 3px rgba(109, 138, 224, 0.2);
 }
 
 .file-input-container input::placeholder,
 .search-input-container input::placeholder,
-.filter-container input::placeholder {
+.filter-container input::placeholder,
+.param-field::placeholder {
     color: #5f6f8c;
+    font-style: italic;
 }
 
-/* ----- Filter Row (attribute, relation, value) ----- */
 .filter-container {
     display: flex;
     gap: 10px;
@@ -148,13 +205,13 @@ button:hover {
     flex: 1;
     min-width: 80px;
     cursor: pointer;
-    padding: 12px 32px 12px 16px;  /* Increased right padding for arrow */
-    appearance: none;  /* Remove default arrow */
+    padding: 12px 32px 12px 16px;
+    appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ccdfff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
     background-repeat: no-repeat;
-    background-position: right 12px center;  /* Arrow positioned 12px from right */
+    background-position: right 12px center;
     background-size: 16px;
 }
 
@@ -162,19 +219,184 @@ button:hover {
     flex: 2;
 }
 
-/* ===== APPLIED FILTERS SECTION ===== */
+.plugin-params {
+    background: #0f1622;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid #2a3448;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    width: 100%;
+}
+
+.plugin-params-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.param-input {
+    animation: slideDown 0.3s ease-out;
+    margin-bottom: 12px;
+}
+
+.param-field {
+    width: 100%;
+    padding: 12px 16px;
+}
+
+.param-field::placeholder {
+    color: #5f6f8c;
+    font-style: italic;
+}
+
+.param-label {
+    display: block;
+    color: #8f9bb5;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.required-star {
+    color: #ff7b89;
+    margin-left: 4px;
+}
+
+.param-input-boolean {
+    grid-column: span 2;
+    background: #10161f;
+    border: 1px solid #2b354a;
+    border-radius: 40px;
+    padding: 8px 16px;
+    transition: all 0.2s ease;
+    width: fit-content;  
+    min-width: auto;     
+    max-width: 100%;   
+}
+
+.param-input-boolean:hover {
+    background: #1a2436;
+    border-color: #3f5270;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ccdfff;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;  
+}
+
+.checkbox-input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #3f5270;
+    border-radius: 4px;  
+    background: #10161f;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.checkbox-input:hover {
+    border-color: #5f7bbf;
+    background: #1a2436;
+}
+
+.checkbox-input:checked {
+    border-color: #6d8ae0;
+    background: #6d8ae0;
+}
+
+.checkbox-input:checked::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.checkbox-input:focus {
+    outline: none;
+    border-color: #6d8ae0;
+    box-shadow: 0 0 0 2px rgba(109, 138, 224, 0.2);
+}
+
+.checkbox-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #2a3448;
+}
+
+.checkbox-input:disabled:hover {
+    background: #10161f;
+    border-color: #2a3448;
+}
+
+.text-btn.load-graph-btn{
+    width: 180px;
+}
+
+.param-name {
+    font-size: 0.95rem;
+}
+
+.param-description {
+    grid-column: span 2;
+    display: block;
+    color: #6f83ad;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    margin-left: 5px;
+    font-style: italic;
+}
+
+.load-graph-btn {
+    width: 100%;
+    background: #252e3f;
+    border: 1px solid #3d4a64;
+    border-radius: 12px;
+    padding: 14px 24px;
+    color: #ccdfff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+.load-graph-btn:hover {
+    background: #2f3b52;
+    border-color: #5f7bbf;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .applied-filters-container {
     background: #0c121c;
     border-radius: 16px;
     padding: 16px;
     border: 1px solid #2a3448;
     display: flex;
-    flex-direction: column;  /* Label above filters */
+    flex-direction: column;
     gap: 12px;
 }
 
 .applied-filters-container > span {
-    display: block;  /* Full width */
+    display: block;
     color: #8f9bb5;
     font-size: 0.9rem;
     text-transform: uppercase;
@@ -182,15 +404,13 @@ button:hover {
     margin-bottom: 4px;
 }
 
-/* ----- Filters Wrapper (horizontal layout) ----- */
 .applied-filters-wrapper {
     display: flex;
-    flex-wrap: wrap;  /* Wrap to next line if needed */
-    gap: 10px;        /* Gap between filter tags */
+    flex-wrap: wrap;
+    gap: 10px;
     align-items: center;
 }
 
-/* ----- Individual Filter Tag ----- */
 .applied-filter {
     display: flex;
     align-items: center;
@@ -200,8 +420,8 @@ button:hover {
     border-radius: 30px;
     padding: 8px 10px 8px 20px;
     width: fit-content;
-    min-width: 140px;  /* Minimum width */
-    max-width: 300px;   /* Maximum width */
+    min-width: 140px;
+    max-width: 300px;
     transition: all 0.2s ease;
 }
 
@@ -215,13 +435,12 @@ button:hover {
 .applied-filter .text-part {
     color: #b3ceff;
     font-size: 0.9rem;
-    white-space: nowrap;        /* Keep text in one line */
-    overflow: hidden;           /* Hide overflow */
-    text-overflow: ellipsis;    /* Add ... for long text */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     margin-right: 10px;
 }
 
-/* ----- Remove Filter Button ----- */
 .remove-applied-filter-btn {
     background: #2f3e60;
     border: none;
@@ -235,11 +454,11 @@ button:hover {
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s;
-    flex-shrink: 0;  /* Prevent button from shrinking */
+    flex-shrink: 0;
 }
 
 .remove-applied-filter-btn:hover {
-    background: #ff7b89;  /* Reddish on hover */
+    background: #ff7b89;
     color: white;
     transform: scale(1.1);
 }
@@ -247,7 +466,7 @@ button:hover {
 /* ===== VIEWS CONTAINER (Main layout) ===== */
 .views-container {
     display: grid;
-    grid-template-columns: 1fr 2fr;  /* Main view is twice as wide */
+    grid-template-columns: 1fr 2fr;
     gap: 20px;
     margin-top: 24px;
     height: 600px;  /* Fixed height */
@@ -319,18 +538,26 @@ button:hover {
     background: rgba(0,0,0,0.6);
 }
 
+.tree-view-container {
+    border-color: #ff7b89;
+    background: rgba(255, 123, 137, 0.15);
+}
+
 /* ----- View-specific colors (with transparency) ----- */
 .bird-view-container {
     border-color: #7bafff;
-    background: rgba(123, 175, 255, 0.15);  /* Blue tint */
+    background: rgba(123, 175, 255, 0.15);
 }
 
 .main-view-container {
     border-color: #9f7bff;
-    background: rgba(159, 123, 255, 0.15);  /* Purple tint */
+    background: rgba(159, 123, 255, 0.15);
 }
 
-/* ----- Hover effects ----- */
+.tree-view-container:hover {
+    background: rgba(255, 123, 137, 0.25);
+}
+
 .bird-view-container:hover {
     background: rgba(123, 175, 255, 0.25);
 }
@@ -339,7 +566,24 @@ button:hover {
     background: rgba(159, 123, 255, 0.25);
 }
 
-/* ===== BIRD VIEW CONTENT ===== */
+.tree-view-container {
+    display: flex;
+    flex-direction: column;
+    padding: 60px 16px 16px 16px;
+}
+
+.tree-view-container::after {
+    white-space: pre;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-size: 0.9rem;
+    color: #e3eaff;
+    line-height: 1.6;
+    background: #10161f;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid #2b354a;
+}
+
 .bird-view-container {
     padding: 60px 16px 16px 16px;
 }
@@ -380,8 +624,33 @@ button:hover {
     flex: 1;
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
-/* Tablet */
+/* ===== LOADING SPINNER ===== */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    margin: 20px auto;
+    border: 3px solid #1f2a3f;
+    border-top: 3px solid #6d8ae0;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @media (max-width: 1024px) {
     .views-container {
         grid-template-columns: 1fr;
@@ -401,9 +670,17 @@ button:hover {
     .filter-container select {
         flex: 1 1 100%;
     }
+    
+    .plugin-params-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .param-input-boolean,
+    .param-description {
+        grid-column: span 1;
+    }
 }
 
-/* Mobile */
 @media (max-width: 768px) {
     .app-container {
         padding: 16px;
