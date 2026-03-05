@@ -78,10 +78,10 @@ class Workspace:
             raise
     
     @classmethod
-    def load(cls, name: str, directory: str = "workspaces") -> 'Workspace':
+    def load(cls, file: str) -> 'Workspace':
         """Loads a workspace from a file by name."""
-        filepath = cls.name_to_filepath(name, directory)
-        
+        filepath = file
+
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"File not found: {filepath}")
         
