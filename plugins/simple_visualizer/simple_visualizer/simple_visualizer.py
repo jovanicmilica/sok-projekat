@@ -25,7 +25,7 @@ class SimpleVisualizer(VisualizerPlugin):
             'nodes': [
                 {
                     'id': node_id,
-                    'name': node.attributes.get('name', node_id),
+                    'name': node.attributes.get('name') or node.attributes.get('label') or str(node_id),
                     'attributes': node.attributes
                 }
                 for node_id, node in graph.nodes.items()

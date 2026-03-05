@@ -40,6 +40,9 @@ function loadGraph() {
             alert(`Error: ${data.error}`);
         } else {
             alert(`Graph loaded!\nNodes: ${data.node_count}\nEdges: ${data.edge_count}`);
+            // Load visualization in iframe
+            const mainViewContainer = document.querySelector('.main-view-container');
+            mainViewContainer.innerHTML = '<iframe src="/render-graph/" style="width: 100%; height: 100%; border: none;"></iframe>';
         }
     })
     .catch(error => {
