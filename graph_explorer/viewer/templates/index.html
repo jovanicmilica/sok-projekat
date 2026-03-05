@@ -6,81 +6,94 @@
     <title>Viewer</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-        <link rel="stylesheet" href="{% static 'css/tree_view.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tree_view.css' %}" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <!--  <link rel="stylesheet" href="../../../graph_explorer/viewer/static/css/style.css" /> -->
   </head>
   <body>
     <div class="app-container">
-        <div class="header">
-            <div class="view-chooser">
-                <span class="title">
-                    Graph Visualizer
-                </span>
-                <ul class="view-mode-chooser">
-                    <li>
-                        <input type="radio" id="simple-view-radio" name="view-choice" value="simple-view" checked>
-                        <label for="simple-view-radio">Simple View</label><br>
-                    </li>
-                    <li>
-                        <input type="radio" id="block-view-radio" name="view-choice" value="block-view">
-                        <label for="block-view-radio">Block View</label><br>
-                    </li>
-                </ul>
-                <ul class="plugin-chooser">
-                    <select name="plugin" id="plugin-select" onchange="handlePluginSelection()">
-                        <option value="none">Select datasource plugin...</option>
-                    </select>
-                </ul>
-            </div>
-            <div class="filters-container">
-                <div class="file-input-container">
-                    
-                </div>
-                <div class="search-input-container">
-                    <input type="text" id="word-search-input" placeholder="Search...">
-                    <button class="text-btn" onclick="addSearch()">Search</button>
-                </div>
-                <div class="filter-container">
-                    <input type="text" id="attribute-name-input" placeholder="Enter attribute name...">
-                    <select id="relation-input" name="relation-input">
-                      <option value="==">==</option>
-                      <option value=">=">>=</option>
-                      <option value=">">></option>
-                      <option value="<"><</option>
-                      <option value="<="><=</option>
-                      <option value="!=">!=</option>
-                    </select>
-                    <input type="text" id="attribute-value-input" placeholder="Enter attribute value...">
-                    <button class="text-btn" onclick="addFilter()">Apply</button>
-                </div>
-                <div class="applied-filters-container">
-                    <span>Applied filters</span>
-                    
-                </div>
-            </div>
+      <div class="header">
+        <div class="view-chooser">
+          <span class="title"> Graph Visualizer </span>
+          <ul class="view-mode-chooser">
+            <li>
+              <input
+                type="radio"
+                id="simple-view-radio"
+                name="view-choice"
+                value="simple-view"
+                checked
+              />
+              <label for="simple-view-radio">Simple View</label><br />
+            </li>
+            <li>
+              <input
+                type="radio"
+                id="block-view-radio"
+                name="view-choice"
+                value="block-view"
+              />
+              <label for="block-view-radio">Block View</label><br />
+            </li>
+          </ul>
+          <ul class="plugin-chooser">
+            <select
+              name="plugin"
+              id="plugin-select"
+              onchange="handlePluginSelection()"
+            >
+              <option value="none">Select datasource plugin...</option>
+            </select>
+          </ul>
         </div>
-        <div class="views-container">
-            <div class="left-column-views">
-                <div class="tree-view-container">
-
-                </div>
-                <div class="bird-view-container">
-
-                </div>
-            </div>
-            <div class="right-column-views">
-                <div class="main-view-container">
-
-                </div>
-            </div>
+        <div class="filters-container">
+          <div class="file-input-container"></div>
+          <div class="search-input-container">
+            <input type="text" id="word-search-input" placeholder="Search..." />
+            <button class="text-btn" onclick="addSearch()">Search</button>
+          </div>
+          <div class="filter-container">
+            <input
+              type="text"
+              id="attribute-name-input"
+              placeholder="Enter attribute name..."
+            />
+            <select id="relation-input" name="relation-input">
+              <option value="==">==</option>
+              <option value=">=">>=</option>
+              <option value=">">></option>
+              <option value="<"><</option>
+              <option value="<="><=</option>
+              <option value="!=">!=</option>
+            </select>
+            <input
+              type="text"
+              id="attribute-value-input"
+              placeholder="Enter attribute value..."
+            />
+            <button class="text-btn" onclick="addFilter()">Apply</button>
+          </div>
+          <div class="applied-filters-container">
+            <span>Applied filters</span>
+          </div>
         </div>
+      </div>
+      <div class="views-container">
+        <div class="left-column-views">
+          <div class="tree-view-container"></div>
+          <div class="bird-view-container"></div>
+        </div>
+        <div class="right-column-views">
+          <div class="main-view-container"></div>
+        </div>
+      </div>
     </div>
 
     <script src="{% static 'js/tree_view.js' %}"></script>
     <!-- <script src="../../../graph_explorer/viewer/static/js/main.js"></script> -->
     <script src="{% static 'js/index_filters.js' %}"></script>
+    <!-- <script src="{% static 'js/main_bird_view.js' %}"></script> -->
     <script src="{% static 'js/index_plugins.js' %}"></script>
-     <!-- <script src="../../../graph_explorer/viewer/static/js/index_filters.js"></script> -->
-  
+    <!-- <script src="../../../graph_explorer/viewer/static/js/index_filters.js"></script> -->
   </body>
 </html>
