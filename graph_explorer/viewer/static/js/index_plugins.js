@@ -40,7 +40,10 @@ function loadGraph() {
         if (data.error) {
             alert(`Error: ${data.error}`);
         } else {
-            alert(`Graph loaded!\nNodes: ${data.node_count}\nEdges: ${data.edge_count}`);
+            alert(`Graph loaded!`);
+            console.log('Received graph data:', data.graph);
+            // this is where GraphSubject is instantiated and graph data is passed to it
+            
             // Load visualization in iframe
             const mainViewContainer = document.querySelector('.main-view-container');
             mainViewContainer.innerHTML = '<iframe src="/render-graph/" style="width: 100%; height: 100%; border: none;"></iframe>';

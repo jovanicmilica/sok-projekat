@@ -100,7 +100,8 @@ def load_graph(request):
             'message': f'Graph loaded with {data_source}',
             'visualizer': visualizer,
             'node_count': node_count,
-            'edge_count': edge_count
+            'edge_count': edge_count,
+            'graph': graph.to_json() if graph else None,
         })
 
     except Exception as e:

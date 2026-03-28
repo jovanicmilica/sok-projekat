@@ -25,6 +25,13 @@ class Graph:
 
     def get_edges(self) -> list[Edge]:
         return list(self.edges.values())
+    
+    def to_json(self):
+        return {
+            'directed': self.directed,
+            'nodes': {node_id: node.to_json() for node_id, node in self.nodes.items()},
+            'edges': [edge.to_json() for edge in self.edges.values()],
+        }
 
     '''
         @classmethod - method can be called on the class itself, rather than on an instance

@@ -5,3 +5,9 @@ class Node:
 
     def __repr__(self):
         return f"Node(id={self.id}, attributes={self.attributes})"
+    
+    def to_json(self):
+        return {
+            'id': self.id,
+            'attributes': self.attributes,
+        }
