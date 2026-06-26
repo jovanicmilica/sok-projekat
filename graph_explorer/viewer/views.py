@@ -103,6 +103,9 @@ def load_graph(request):
             'edge_count': edge_count,
             'graph': graph.to_json() if graph else None,
             'visualizer_assets': platform.get_current_visualizer_assets(),
+            'workspaces': platform.list_workspaces(),
+            'workspace': platform.get_active_workspace_payload()['workspace'],
+            'operations': [],
         })
 
     except Exception as e:
@@ -159,6 +162,76 @@ def apply_graph_operations(request):
             'status': 'success',
             **result,
         })
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
+def list_workspaces(request):
+    platform = GraphPlatform()
+    return JsonResponse({
+        'active_workspace_id': platform.active_workspace_id,
+        **platform.get_active_workspace_payload(),
+    })
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_workspace(request):
+    try:
+        data = json.loads(request.body or '{}')
+        payload = GraphPlatform().create_workspace(data.get('name', 'New Workspace'))
+        return JsonResponse({'status': 'success', **payload})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def save_workspace(request):
+    try:
+        data = json.loads(request.body or '{}')
+        payload = GraphPlatform().save_workspace(
+            workspace_id=data.get('workspace_id'),
+            name=data.get('name')
+        )
+        return JsonResponse({'status': 'success', **payload})
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def switch_workspace(request):
+    try:
+        data = json.loads(request.body or '{}')
+        payload = GraphPlatform().switch_workspace(data.get('workspace_id'))
+        return JsonResponse({'status': 'success', **payload})
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=404)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def delete_workspace(request):
+    try:
+        data = json.loads(request.body or '{}')
+        payload = GraphPlatform().delete_workspace(data.get('workspace_id'))
+        return JsonResponse({'status': 'success', **payload})
     except ValueError as e:
         return JsonResponse({'error': str(e)}, status=400)
     except Exception as e:
