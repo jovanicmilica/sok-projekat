@@ -14,4 +14,10 @@ urlpatterns = [
     path('api/visualizers/', views.list_visualizers, name='list_visualizers'),
     path('api/visualizer-assets/', views.visualizer_assets, name='visualizer_assets'),
     path('api/graph-operations/', views.apply_graph_operations, name='graph_operations'),
+    path('api/cli/execute/', views.execute_cli_command, name='execute_cli_command'),
+    path('api/workspaces/', views.list_workspaces, name='workspaces'),
+    path('api/workspaces/create/', views.create_workspace, name='create_workspace'),
+    path('api/workspaces/save/', views.save_workspace, name='save_workspace'),
+    path('api/workspaces/switch/', views.switch_workspace, name='switch_workspace'),
+    path('api/workspaces/delete/', views.delete_workspace, name='delete_workspace'),
 ]

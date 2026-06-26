@@ -1,137 +1,257 @@
-// ===== WORKSPACE MANAGEMENT =====
-
-// Trenutni workspace-ovi (simulacija baze podataka)
-let workspaces = [
-    { id: 'default', name: 'Default Workspace', active: true },
-    { id: 'test1', name: 'JSON Test', active: false },
-    { id: 'test2', name: 'CSV Export', active: false }
-];
-
+let workspaces = [];
 let currentWorkspaceId = 'default';
 
-// Inicijalizacija workspace-ova
-function initWorkspaces() {
-    renderWorkspaceList();
-}
-
-// Prikaz workspace liste
 function renderWorkspaceList() {
     const workspaceList = document.getElementById('workspace-list');
-    if (!workspaceList) return;
-    
+    if (!workspaceList) {
+        return;
+    }
+
     workspaceList.innerHTML = '';
-    
+
     workspaces.forEach(workspace => {
         const badge = document.createElement('div');
-        badge.className = `workspace-badge ${workspace.id === currentWorkspaceId ? 'active' : ''}`;
+        badge.className = 'workspace-badge ' + (workspace.id === currentWorkspaceId ? 'active' : '');
         badge.dataset.id = workspace.id;
-        
+        badge.title = getWorkspaceTitle(workspace);
+
         const nameSpan = document.createElement('span');
+        nameSpan.className = 'workspace-name';
         nameSpan.textContent = workspace.name;
-        nameSpan.onclick = () => switchWorkspace(workspace.id);
-        
-        const removeBtn = document.createElement('span');
-        removeBtn.className = 'remove-workspace';
-        removeBtn.textContent = '×';
-        removeBtn.onclick = (e) => {
-            e.stopPropagation();
-            deleteWorkspace(workspace.id);
-        };
-        
+        nameSpan.addEventListener('click', () => switchWorkspace(workspace.id));
+
+        const metaSpan = document.createElement('span');
+        metaSpan.className = 'workspace-meta';
+        metaSpan.textContent = workspace.has_graph
+            ? workspace.node_count + 'N/' + workspace.edge_count + 'E'
+            : 'empty';
+        metaSpan.addEventListener('click', () => switchWorkspace(workspace.id));
+
         badge.appendChild(nameSpan);
-        badge.appendChild(removeBtn);
+        badge.appendChild(metaSpan);
+
+        if (workspace.id !== 'default') {
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-workspace';
+            removeBtn.type = 'button';
+            removeBtn.textContent = 'x';
+            removeBtn.addEventListener('click', event => {
+                event.stopPropagation();
+                deleteWorkspace(workspace.id);
+            });
+            badge.appendChild(removeBtn);
+        }
+
         workspaceList.appendChild(badge);
     });
 }
 
-// Kreiranje novog workspace-a
-function createNewWorkspace() {
-    const name = prompt('Enter workspace name:', 'New Workspace');
-    if (!name) return;
-    
-    const newWorkspace = {
-        id: 'ws_' + Date.now(),
-        name: name,
-        active: false
-    };
-    
-    workspaces.push(newWorkspace);
-    switchWorkspace(newWorkspace.id);
-    renderWorkspaceList();
-}
-
-// Čuvanje trenutnog workspace-a
-function saveWorkspace() {
-    const currentWorkspace = workspaces.find(w => w.id === currentWorkspaceId);
-    if (!currentWorkspace) return;
-    
-    // TODO: Ovdje sačuvaj trenutno stanje
-    // - Izabrani plugin
-    // - Parametri
-    // - Graf
-    // - Filteri
-    // - Pretrage
-    
-    const workspaceState = {
-        id: currentWorkspaceId,
-        name: currentWorkspace.name,
-        timestamp: new Date().toISOString(),
-        plugin: document.getElementById('plugin-select').value,
-        // Dodaj ostale podatke
-    };
-    
-    console.log('💾 Čuvam workspace:', workspaceState);
-    
-    // Simulacija čuvanja u localStorage
-    localStorage.setItem(`workspace_${currentWorkspaceId}`, JSON.stringify(workspaceState));
-    
-    alert(`Workspace "${currentWorkspace.name}" saved!`);
-}
-
-// Prebacivanje na drugi workspace
-function switchWorkspace(workspaceId) {
-    const oldWorkspaceId = currentWorkspaceId;
-    currentWorkspaceId = workspaceId;
-    
-    // TODO: Učitaj stanje za novi workspace
-    const savedState = localStorage.getItem(`workspace_${workspaceId}`);
-    
-    if (savedState) {
-        const state = JSON.parse(savedState);
-        console.log('📂 Učitavam workspace:', state);
-        
-        // TODO: Restore state
-        // - Postavi plugin
-        // - Učitaj graf
-        // - Prikaži filtere
+function getWorkspaceTitle(workspace) {
+    const parts = [workspace.name];
+    if (workspace.data_source_plugin) {
+        parts.push('source: ' + workspace.data_source_plugin);
     }
-    
-    renderWorkspaceList();
+    if (workspace.visualizer_plugin) {
+        parts.push('visualizer: ' + workspace.visualizer_plugin);
+    }
+    if (workspace.operations_count) {
+        parts.push('operations: ' + workspace.operations_count);
+    }
+    return parts.join('\n');
 }
 
-// Brisanje workspace-a
-function deleteWorkspace(workspaceId) {
-    if (workspaceId === 'default') {
-        alert('Cannot delete default workspace!');
+function refreshWorkspacesFromPayload(payload) {
+    if (!payload) {
         return;
     }
-    
-    if (!confirm('Are you sure you want to delete this workspace?')) return;
-    
-    workspaces = workspaces.filter(w => w.id !== workspaceId);
-    localStorage.removeItem(`workspace_${workspaceId}`);
-    
-    if (currentWorkspaceId === workspaceId) {
-        switchWorkspace('default');
+
+    if (Array.isArray(payload.workspaces)) {
+        workspaces = payload.workspaces;
     }
-    
+
+    if (payload.workspace && payload.workspace.id) {
+        currentWorkspaceId = payload.workspace.id;
+    } else if (payload.active_workspace_id) {
+        currentWorkspaceId = payload.active_workspace_id;
+    } else {
+        const active = workspaces.find(workspace => workspace.active);
+        if (active) {
+            currentWorkspaceId = active.id;
+        }
+    }
+
     renderWorkspaceList();
 }
 
-// Dodaj event listener za dugmad nakon učitavanja stranice
-document.addEventListener('DOMContentLoaded', function() {
-    // Već postojeći kod...
-    
-    // Inicijalizuj workspace-ove
-    initWorkspaces();
-});
+function applyWorkspacePayload(payload) {
+    refreshWorkspacesFromPayload(payload);
+
+    if (payload.workspace) {
+        setWorkspaceSelectValues(payload.workspace);
+    }
+
+    if (typeof window.setGraphOperationsFromServer === 'function') {
+        window.setGraphOperationsFromServer(payload.operations || []);
+    }
+
+    const nextAssets = payload.visualizer_assets || {
+        name: null,
+        css: '',
+        nodes: {},
+        defaults: { width: 96, height: 64 }
+    };
+    if (typeof window.setVisualizerAssets === 'function') {
+        window.setVisualizerAssets(nextAssets);
+    }
+
+    const nextGraph = payload.graph || { nodes: {}, edges: [], directed: true };
+    if (typeof publishGraphData === 'function') {
+        publishGraphData(nextGraph);
+    }
+
+    if (payload.workspace && !payload.workspace.has_graph) {
+        resetWorkspaceInputs();
+    }
+}
+
+function setWorkspaceSelectValues(workspace) {
+    const dataSourceSelect = document.getElementById('plugin-select');
+    const visualizerSelect = document.getElementById('visualizer-plugin-select');
+
+    if (dataSourceSelect) {
+        dataSourceSelect.value = workspace.data_source_plugin || 'none';
+    }
+    if (visualizerSelect) {
+        visualizerSelect.value = workspace.visualizer_plugin || 'none';
+    }
+}
+
+function resetWorkspaceInputs() {
+    if (typeof resetToDefaultInput === 'function') {
+        resetToDefaultInput();
+    }
+
+    const searchInput = document.getElementById('word-search-input');
+    const attributeNameInput = document.getElementById('attribute-name-input');
+    const attributeValueInput = document.getElementById('attribute-value-input');
+    const relationInput = document.getElementById('relation-input');
+
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    if (attributeNameInput) {
+        attributeNameInput.value = '';
+    }
+    if (attributeValueInput) {
+        attributeValueInput.value = '';
+    }
+    if (relationInput) {
+        relationInput.value = '==';
+    }
+}
+
+async function requestWorkspace(url, body) {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body || {})
+    });
+
+    const data = await response.json();
+    if (!response.ok || data.error) {
+        throw new Error(data.error || 'Workspace request failed');
+    }
+    return data;
+}
+
+async function loadWorkspaces() {
+    try {
+        const response = await fetch('/api/workspaces/');
+        const data = await response.json();
+        if (!response.ok || data.error) {
+            throw new Error(data.error || 'Failed to load workspaces');
+        }
+        applyWorkspacePayload(data);
+    } catch (error) {
+        console.error('Greska pri ucitavanju workspace-ova:', error);
+    }
+}
+
+async function createNewWorkspace() {
+    const name = prompt('Enter workspace name:', 'New Workspace');
+    if (!name) {
+        return;
+    }
+
+    try {
+        const payload = await requestWorkspace('/api/workspaces/create/', { name });
+        applyWorkspacePayload(payload);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function saveWorkspace() {
+    const currentWorkspace = workspaces.find(workspace => workspace.id === currentWorkspaceId);
+    if (!currentWorkspace) {
+        return;
+    }
+
+    try {
+        const payload = await requestWorkspace('/api/workspaces/save/', {
+            workspace_id: currentWorkspaceId,
+            name: currentWorkspace.name,
+        });
+        applyWorkspacePayload(payload);
+        alert('Workspace "' + payload.workspace.name + '" saved.');
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function switchWorkspace(workspaceId) {
+    if (!workspaceId || workspaceId === currentWorkspaceId) {
+        return;
+    }
+
+    try {
+        const payload = await requestWorkspace('/api/workspaces/switch/', {
+            workspace_id: workspaceId,
+        });
+        applyWorkspacePayload(payload);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function deleteWorkspace(workspaceId) {
+    if (workspaceId === 'default') {
+        alert('Cannot delete default workspace.');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to delete this workspace?')) {
+        return;
+    }
+
+    try {
+        const payload = await requestWorkspace('/api/workspaces/delete/', {
+            workspace_id: workspaceId,
+        });
+        applyWorkspacePayload(payload);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+window.refreshWorkspacesFromPayload = refreshWorkspacesFromPayload;
+window.applyWorkspacePayload = applyWorkspacePayload;
+window.loadWorkspaces = loadWorkspaces;
+window.createNewWorkspace = createNewWorkspace;
+window.saveWorkspace = saveWorkspace;
+window.switchWorkspace = switchWorkspace;
+window.deleteWorkspace = deleteWorkspace;
+
+document.addEventListener('DOMContentLoaded', loadWorkspaces);
