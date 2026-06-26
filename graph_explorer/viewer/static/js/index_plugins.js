@@ -42,6 +42,9 @@ function loadGraph() {
         } else {
             alert(`Graph loaded!`);
             console.log('Received graph data:', data.graph);
+            if (typeof window.clearGraphOperationsForNewGraph === 'function') {
+                window.clearGraphOperationsForNewGraph();
+            }
             if (data.visualizer_assets && typeof window.setVisualizerAssets === 'function') {
                 window.setVisualizerAssets(data.visualizer_assets);
             }

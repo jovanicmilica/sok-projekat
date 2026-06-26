@@ -1,4 +1,5 @@
 from api.models.graph import GraphBuilder
+from project_platform.graph_operations import GraphOperations
 from project_platform.plugin_manager import PluginManager
 
 
@@ -9,10 +10,12 @@ class GraphPlatform:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.plugin_manager = PluginManager()
-            cls._instance.current_graph = None    
+            cls._instance.original_graph = None
+            cls._instance.current_graph = None
             cls._instance.current_data_plugin = None
             cls._instance.current_visualizer = None
             cls._instance.current_visualizer_instance = None  # za instancu vizualizera
+            cls._instance.graph_operations = GraphOperations()
         return cls._instance
 
     def get_data_source_plugins(self):
@@ -46,6 +49,7 @@ class GraphPlatform:
         graph = plugin_instance.parse(**parameters)
         
         # 2. Store current graph
+        self.original_graph = graph
         self.current_graph = graph
         self.current_data_plugin = data_source_plugin_name
         
@@ -65,6 +69,43 @@ class GraphPlatform:
         
         return graph
     
+
+    def apply_operations(self, operations: list[dict]) -> dict:
+        """
+        Apply search/filter operations successively from the original graph.
+        """
+        if not self.original_graph:
+            raise ValueError("No graph loaded")
+
+        graph = self.original_graph
+        normalized_operations = []
+
+        for operation in operations or []:
+            operation_type = operation.get('type')
+            query = operation.get('query', '')
+
+            if operation_type == 'search':
+                graph = self.graph_operations.search(graph, query)
+            elif operation_type == 'filter':
+                graph = self.graph_operations.filter(graph, query)
+            else:
+                raise ValueError(f"Unknown graph operation: {operation_type}")
+
+            normalized_operations.append({
+                'type': operation_type,
+                'query': query,
+            })
+
+        self.current_graph = graph
+
+        return {
+            'graph': graph.to_json(),
+            'operations': normalized_operations,
+            'visualizer_assets': self.get_current_visualizer_assets(),
+            'node_count': len(graph.nodes),
+            'edge_count': len(graph.edges),
+        }
+
     def render_current_graph(self):
         """Renderuje trenutni graf koristeći izabrani vizualizer"""
         if not self.current_graph:

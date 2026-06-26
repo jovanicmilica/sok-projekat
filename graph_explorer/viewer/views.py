@@ -145,3 +145,23 @@ def visualizer_assets(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def apply_graph_operations(request):
+    """Apply search/filter operations in the platform and return the resulting subgraph."""
+    try:
+        data = json.loads(request.body or '{}')
+        operations = data.get('operations', [])
+        result = GraphPlatform().apply_operations(operations)
+        return JsonResponse({
+            'status': 'success',
+            **result,
+        })
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)

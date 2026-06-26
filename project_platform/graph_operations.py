@@ -1,4 +1,5 @@
 import re
+from datetime import date, datetime
 from typing import Set
 
 from api.models.graph import Graph
@@ -166,8 +167,13 @@ class GraphOperations:
                     return True
                 elif lower_val in ('false', 'no', '0'):
                     return False
-                else:
-                    return bool(value_str)
+                return None
+            elif isinstance(example_value, date):
+                clean_value = value_str
+                if (clean_value.startswith('"') and clean_value.endswith('"')) or \
+                        (clean_value.startswith("'") and clean_value.endswith("'")):
+                    clean_value = clean_value[1:-1]
+                return datetime.strptime(clean_value, '%Y-%m-%d').date()
             else:
                 if (value_str.startswith('"') and value_str.endswith('"')) or \
                         (value_str.startswith("'") and value_str.endswith("'")):
