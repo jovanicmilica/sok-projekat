@@ -81,6 +81,7 @@
 
           <div class="applied-filters-container">
             <span>Applied filters</span>
+            <button class="text-btn reset-filters-btn" type="button" onclick="resetGraphOperations()">Reset</button>
             <!-- Applied filters will be added here dynamically -->
           </div>
         </div>
@@ -97,6 +98,7 @@
       </div>
     </div>
 
+    <script src="{% static 'js/graph_observer.js' %}"></script>
     <script src="{% static 'js/tree_view.js' %}"></script>
     <script src="{% static 'js/index_filters.js' %}"></script>
     <script src="{% static 'js/index_plugins.js' %}"></script>

@@ -7,3 +7,11 @@ class Edge:
 
     def __repr__(self):
         return f"Edge(id={self.id}, {self.source}->{self.target}\nattributes={self.attributes})"
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'source': self.source,
+            'target': self.target,
+            'attributes': self.attributes,
+        }

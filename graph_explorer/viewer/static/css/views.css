@@ -119,6 +119,8 @@
 
 .bird-view-container {
     padding: 60px 16px 16px 16px;
+    display: flex;
+    flex-direction: column;
 }
 
 .bird-view-container::after {
@@ -191,6 +193,15 @@
     position: relative;
 }
 
+.bird-graph-stage {
+    background: #10161f;
+    border: 1px solid #2e3850;
+    border-radius: 16px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
 .main-graph-svg,
 .bird-graph-svg {
     width: 100%;
@@ -232,4 +243,130 @@
     stroke: #7bafff;
     stroke-width: 1.6;
     cursor: move;
+}
+
+.main-node,
+.bird-node-circle {
+    cursor: grab;
+}
+
+.main-node.is-selected .main-node-circle {
+    fill: #ffdf6e;
+    stroke: #fff6c7;
+    stroke-width: 4;
+    filter: drop-shadow(0 0 8px rgba(255, 223, 110, 0.7));
+}
+
+.main-node.is-selected .main-node-label {
+    fill: #fff6c7;
+    font-weight: 700;
+}
+
+.bird-node-circle.is-selected {
+    fill: #ffdf6e;
+    stroke: #fff6c7;
+    stroke-width: 3;
+}
+
+.bird-viewport-rect {
+    pointer-events: all;
+}
+
+.main-node.is-dragging .main-node-circle {
+    fill: #f59f5a;
+    stroke: #ffe0bd;
+    stroke-width: 4;
+    filter: drop-shadow(0 0 10px rgba(245, 159, 90, 0.7));
+}
+
+.main-node.is-dragging {
+    cursor: grabbing;
+}
+
+.graph-tooltip {
+    position: fixed;
+    z-index: 9999;
+    max-width: 280px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(198, 220, 255, 0.35);
+    background: rgba(10, 15, 24, 0.96);
+    color: #e3eaff;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+    font-size: 0.82rem;
+}
+
+.graph-tooltip.hidden {
+    display: none;
+}
+
+.graph-tooltip .tooltip-title {
+    margin-bottom: 8px;
+    color: #fff6c7;
+    font-weight: 800;
+}
+
+.graph-tooltip table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.graph-tooltip td {
+    padding: 3px 6px 3px 0;
+    vertical-align: top;
+    border-top: 1px solid rgba(198, 220, 255, 0.12);
+}
+
+.graph-tooltip td:first-child {
+    color: #9bb9e8;
+    font-weight: 700;
+}
+
+.tooltip-muted {
+    color: #8f9bb5;
+}
+
+.main-node-foreign-object {
+    overflow: visible;
+    pointer-events: all;
+}
+
+.main-node-html,
+.graph-node-render {
+    box-sizing: border-box;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.default-visualizer-node {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 2px solid #c6dcff;
+    background: #4b82c8;
+    color: #e3eaff;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+    padding: 8px 12px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.default-visualizer-node span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.main-node.is-selected .default-visualizer-node {
+    border-color: #fff6c7;
+    background: #d7a935;
+    color: #fff8d8;
+    box-shadow: 0 0 0 4px rgba(255, 223, 110, 0.28);
 }

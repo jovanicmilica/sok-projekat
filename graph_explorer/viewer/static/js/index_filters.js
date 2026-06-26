@@ -1,12 +1,16 @@
 let searches = [];
 let filters = [];
-window.APP_GRAPH_DATA = { nodes: {}, edges: [] };
+let graphOperations = [];
+window.APP_GRAPH_DATA = window.APP_GRAPH_DATA || { nodes: {}, edges: [] };
 
 function publishGraphData(graphData) {
+    if (window.graphSubject) {
+        window.graphSubject.setGraphData(graphData);
+        return;
+    }
+
     window.APP_GRAPH_DATA = graphData || { nodes: {}, edges: [] };
-    window.dispatchEvent(new CustomEvent('graphDataLoaded', {
-        detail: window.APP_GRAPH_DATA
-    }));
+    window.dispatchEvent(new CustomEvent('graphDataLoaded', { detail: window.APP_GRAPH_DATA }));
 }
 
 async function loadGraphData() {
@@ -18,6 +22,9 @@ async function loadGraphData() {
 
         const data = await response.json();
         publishGraphData(data);
+        if (typeof window.loadVisualizerAssets === 'function') {
+            window.loadVisualizerAssets();
+        }
     } catch (error) {
         publishGraphData(window.TEST_GRAPH_DATA || { nodes: {}, edges: [] });
     }
@@ -25,12 +32,7 @@ async function loadGraphData() {
 
 function getSearchText() {
     const searchInput = document.getElementById('word-search-input').value.trim();
-    if (searchInput == "") {
-        return null;
-    } 
-    else {
-        return searchInput;
-    }
+    return searchInput === '' ? null : searchInput;
 }
 
 function clearSearchInput() {
@@ -41,25 +43,65 @@ function getFilterText() {
     const attributeName = document.getElementById('attribute-name-input').value.trim();
     const relation = document.getElementById('relation-input').value;
     const attributeValue = document.getElementById('attribute-value-input').value.trim();
-    if (attributeName == "" || attributeValue == "") {
-        return null; 
+
+    if (attributeName === '' || attributeValue === '') {
+        return null;
     }
-    else {
-        return `${attributeName} ${relation} ${attributeValue}`;
-    }
+
+    return attributeName + ' ' + relation + ' ' + attributeValue;
 }
 
 function clearFilterInputs() {
     document.getElementById('attribute-name-input').value = '';
     document.getElementById('attribute-value-input').value = '';
-    document.getElementById('relation-input').value = 'equals';
+    document.getElementById('relation-input').value = '==';
 }
 
-function addQuery(filterText, type) {
-    // Create new filter element
-    const appliedFiltersContainer = document.querySelector('.applied-filters-container');
+function syncOperationLists() {
+    searches = graphOperations
+        .filter(operation => operation.type === 'search')
+        .map(operation => operation.query);
+    filters = graphOperations
+        .filter(operation => operation.type === 'filter')
+        .map(operation => operation.query);
+}
 
-    // Check weather the wrapper for filters already exists, if not create it
+function getOperationLabel(operation) {
+    return operation.type === 'search'
+        ? 'Search: ' + operation.query
+        : 'Filter: ' + operation.query;
+}
+
+function showFilterError(message) {
+    const container = document.querySelector('.applied-filters-container');
+    if (!container) {
+        alert(message);
+        return;
+    }
+
+    let error = container.querySelector('.filter-error-message');
+    if (!error) {
+        error = document.createElement('div');
+        error.className = 'filter-error-message';
+        container.appendChild(error);
+    }
+
+    error.textContent = message;
+}
+
+function clearFilterError() {
+    const error = document.querySelector('.filter-error-message');
+    if (error) {
+        error.remove();
+    }
+}
+
+function renderAppliedOperations() {
+    const appliedFiltersContainer = document.querySelector('.applied-filters-container');
+    if (!appliedFiltersContainer) {
+        return;
+    }
+
     let filtersWrapper = appliedFiltersContainer.querySelector('.applied-filters-wrapper');
     if (!filtersWrapper) {
         filtersWrapper = document.createElement('div');
@@ -67,95 +109,130 @@ function addQuery(filterText, type) {
         appliedFiltersContainer.appendChild(filtersWrapper);
     }
 
-    // Create the filter div and set its classes based on the type (search or filter)
-    const filterDiv = document.createElement('div');
-    filterDiv.classList.add('applied-filter');
-    filterDiv.classList.add(type === 'search' ? 'search-filter' : 'attribute-filter');
+    filtersWrapper.innerHTML = '';
 
-    // Filter text part
-    const textPart = document.createElement('div');
-    textPart.className = 'text-part';
-    textPart.textContent = filterText;
+    graphOperations.forEach((operation, index) => {
+        const filterDiv = document.createElement('div');
+        filterDiv.classList.add('applied-filter');
+        filterDiv.classList.add(operation.type === 'search' ? 'search-filter' : 'attribute-filter');
+        filterDiv.dataset.type = operation.type;
+        filterDiv.dataset.filterText = operation.query;
 
-    // Remove button
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'remove-applied-filter-btn';
-    removeBtn.textContent = 'x';
-    
-    // Add data attributes to identify the type and text of the filter for later removal
-    filterDiv.dataset.type = type;
-    filterDiv.dataset.filterText = filterText;
-    
-    removeBtn.onclick = function() {
-        // Remove the filter element from the DOM
-        filterDiv.remove();
-        
-        // Remove the filter from the corresponding array (searches or filters) based on its type
-        const filterType = filterDiv.dataset.type;
-        const filterText = filterDiv.dataset.filterText;
-        
-        if (filterType === 'search') {
-            // Remove from searches array
-            const index = searches.indexOf(filterText);
-            if (index > -1) {
-                searches.splice(index, 1);
-            }
-            console.log('Searches after removal:', searches);
-        } else {
-            // Remove from filters array
-            const index = filters.indexOf(filterText);
-            if (index > -1) {
-                filters.splice(index, 1);
-            }
-            console.log('Filters after removal:', filters);
-        }
-        
-        // Remove the wrapper if there are no more filters inside
-        if (filtersWrapper.children.length === 0) {
-            filtersWrapper.remove();
-        }
-    };
+        const textPart = document.createElement('div');
+        textPart.className = 'text-part';
+        textPart.textContent = getOperationLabel(operation);
 
-    // Add text and remove button to filter div
-    filterDiv.appendChild(textPart);
-    filterDiv.appendChild(removeBtn);
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-applied-filter-btn';
+        removeBtn.type = 'button';
+        removeBtn.textContent = 'x';
+        removeBtn.addEventListener('click', () => removeOperation(index));
 
-    // Add the new filter div to the wrapper
-    filtersWrapper.appendChild(filterDiv);
+        filterDiv.appendChild(textPart);
+        filterDiv.appendChild(removeBtn);
+        filtersWrapper.appendChild(filterDiv);
+    });
+
+    filtersWrapper.hidden = graphOperations.length === 0;
 }
 
-function addFilter() {
+async function applyGraphOperations() {
+    clearFilterError();
+
+    const response = await fetch('/api/graph-operations/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ operations: graphOperations })
+    });
+
+    const data = await response.json();
+    if (!response.ok || data.error) {
+        throw new Error(data.error || 'Failed to apply graph operations');
+    }
+
+    graphOperations = data.operations || graphOperations;
+    syncOperationLists();
+    renderAppliedOperations();
+
+    if (data.visualizer_assets && typeof window.setVisualizerAssets === 'function') {
+        window.setVisualizerAssets(data.visualizer_assets);
+    }
+    publishGraphData(data.graph);
+}
+
+async function addOperation(operation) {
+    graphOperations.push(operation);
+
+    try {
+        await applyGraphOperations();
+        return true;
+    } catch (error) {
+        graphOperations.pop();
+        syncOperationLists();
+        renderAppliedOperations();
+        showFilterError(error.message);
+        return false;
+    }
+}
+
+async function removeOperation(index) {
+    const removed = graphOperations.splice(index, 1)[0];
+
+    try {
+        await applyGraphOperations();
+    } catch (error) {
+        graphOperations.splice(index, 0, removed);
+        syncOperationLists();
+        renderAppliedOperations();
+        showFilterError(error.message);
+    }
+}
+
+function resetGraphOperations() {
+    graphOperations = [];
+    searches = [];
+    filters = [];
+    renderAppliedOperations();
+    applyGraphOperations().catch(error => showFilterError(error.message));
+}
+
+function clearGraphOperationsForNewGraph() {
+    graphOperations = [];
+    searches = [];
+    filters = [];
+    clearFilterError();
+    renderAppliedOperations();
+}
+
+async function addFilter() {
     const filterText = getFilterText();
-    if (filterText) {
-        // Add to filters array before creating the element
-        filters.push(filterText);
-        console.log('Filters after add:', filters);
-        
-        // Pass the type 'filter' to the addQuery function
-        addQuery(filterText, 'filter');
+    if (!filterText) {
+        return;
+    }
+
+    if (await addOperation({ type: 'filter', query: filterText })) {
         clearFilterInputs();
     }
 }
 
-function addSearch() {
-    const searchText = getSearchText(); 
-    if (searchText) {
-        // Add to searches array before creating the element
-        searches.push(searchText);
-        console.log('Searches after add:', searches);
-        
-        // Pass the type 'search' to the addQuery function
-        addQuery(searchText, 'search');
+async function addSearch() {
+    const searchText = getSearchText();
+    if (!searchText) {
+        return;
+    }
+
+    if (await addOperation({ type: 'search', query: searchText })) {
         clearSearchInput();
-    }  
+    }
 }
 
-// Setup event listeners for filter input fields to trigger addFilter on Enter key press
 function setupFilterInputs() {
     const inputs = [
         document.getElementById('attribute-name-input'),
         document.getElementById('attribute-value-input')
-    ];
+    ].filter(Boolean);
 
     inputs.forEach(input => {
         input.addEventListener('keypress', function(e) {
@@ -164,7 +241,7 @@ function setupFilterInputs() {
             }
         });
     });
-    
+
     const searchInput = document.getElementById('word-search-input');
     if (searchInput) {
         searchInput.addEventListener('keypress', function(e) {
@@ -208,17 +285,20 @@ function setupViewChooser() {
     });
 }
 
-// Setup event listener for when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', setupFilterInputs);
-document.addEventListener('DOMContentLoaded', setupViewChooser);
-document.addEventListener('DOMContentLoaded', loadGraphData);
-
 function testFunction() {
     console.log('Test function called');
 }
 
-// Optional function to show current state of searches and filters in console
 function showCurrentState() {
+    console.log('Current operations:', graphOperations);
     console.log('Current searches:', searches);
     console.log('Current filters:', filters);
 }
+
+window.resetGraphOperations = resetGraphOperations;
+window.clearGraphOperationsForNewGraph = clearGraphOperationsForNewGraph;
+
+document.addEventListener('DOMContentLoaded', setupFilterInputs);
+document.addEventListener('DOMContentLoaded', setupViewChooser);
+document.addEventListener('DOMContentLoaded', renderAppliedOperations);
+document.addEventListener('DOMContentLoaded', loadGraphData);
