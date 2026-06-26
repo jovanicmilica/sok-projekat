@@ -42,11 +42,12 @@ function loadGraph() {
         } else {
             alert(`Graph loaded!`);
             console.log('Received graph data:', data.graph);
-            // this is where GraphSubject is instantiated and graph data is passed to it
-            
-            // Load visualization in iframe
-            const mainViewContainer = document.querySelector('.main-view-container');
-            mainViewContainer.innerHTML = '<iframe src="/render-graph/" style="width: 100%; height: 100%; border: none;"></iframe>';
+            if (data.visualizer_assets && typeof window.setVisualizerAssets === 'function') {
+                window.setVisualizerAssets(data.visualizer_assets);
+            }
+            if (typeof publishGraphData === 'function') {
+                publishGraphData(data.graph);
+            }
         }
     })
     .catch(error => {
@@ -92,6 +93,26 @@ function loadPlugins() {
             console.error('Greška:', error);
             selectDataSource.innerHTML = '<option value="none">Error loading plugins</option>';
         });
+}
+
+function handleVisualizerPluginSelection() {
+    const selectElement = document.getElementById('visualizer-plugin-select');
+    const selectedVisualizer = selectElement ? selectElement.value : null;
+    console.log('Izabrani visualizer:', selectedVisualizer);
+
+    if (!selectedVisualizer || selectedVisualizer === 'none' || typeof window.setVisualizerAssets !== 'function') {
+        return;
+    }
+
+    fetch(`/api/visualizer-assets/?visualizer=${encodeURIComponent(selectedVisualizer)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(assets => window.setVisualizerAssets(assets))
+        .catch(error => console.error('Greška pri učitavanju visualizer assets:', error));
 }
 
 function handleDataSourcePluginSelection() {
@@ -206,6 +227,6 @@ function renderParameterInputs(pluginName, parameters) {
 document.addEventListener('DOMContentLoaded', function() {
     const selectElement = document.getElementById('plugin-select');
     if (selectElement) {
-        selectElement.addEventListener('change', handlePluginSelection);
+        selectElement.addEventListener('change', handleDataSourcePluginSelection);
     }
 });

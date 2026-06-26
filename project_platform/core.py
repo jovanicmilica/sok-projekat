@@ -78,3 +78,22 @@ class GraphPlatform:
             return self.current_visualizer_instance.render(self.current_graph)
         except Exception as e:
             return f"<div>Error rendering graph: {e}</div>"
+
+    def get_current_visualizer_assets(self, visualizer_plugin_name: str = None):
+        """Return HTML/CSS assets for the current frontend visualizer."""
+        if visualizer_plugin_name and visualizer_plugin_name != 'none':
+            visualizer_class = self.plugin_manager.get_visualizer_plugin_class(visualizer_plugin_name)
+            if not visualizer_class:
+                raise ValueError(f"Visualizer plugin not found: {visualizer_plugin_name}")
+            self.current_visualizer_instance = visualizer_class()
+            self.current_visualizer = visualizer_plugin_name
+
+        if not self.current_graph or not self.current_visualizer_instance:
+            return {
+                'name': self.current_visualizer,
+                'css': '',
+                'nodes': {},
+                'defaults': {'width': 96, 'height': 64},
+            }
+
+        return self.current_visualizer_instance.get_frontend_assets(self.current_graph)

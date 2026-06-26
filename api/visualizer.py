@@ -17,3 +17,20 @@ class VisualizerPlugin(ABC):
         Return the name of the visualizer plugin.
         """
         pass
+
+    def get_frontend_assets(self, graph: Graph) -> dict:
+        """
+        Return visual assets used by graph_explorer.
+
+        Visualizer plugins own node HTML and CSS. The graph_explorer frontend owns
+        layout, zoom, drag, selection and communication between views.
+        """
+        return {
+            'name': self.get_name(),
+            'css': '',
+            'nodes': {},
+            'defaults': {
+                'width': 96,
+                'height': 64,
+            },
+        }

@@ -1,12 +1,15 @@
 let searches = [];
 let filters = [];
-window.APP_GRAPH_DATA = { nodes: {}, edges: [] };
+window.APP_GRAPH_DATA = window.APP_GRAPH_DATA || { nodes: {}, edges: [] };
 
 function publishGraphData(graphData) {
+    if (window.graphSubject) {
+        window.graphSubject.setGraphData(graphData);
+        return;
+    }
+
     window.APP_GRAPH_DATA = graphData || { nodes: {}, edges: [] };
-    window.dispatchEvent(new CustomEvent('graphDataLoaded', {
-        detail: window.APP_GRAPH_DATA
-    }));
+    window.dispatchEvent(new CustomEvent('graphDataLoaded', { detail: window.APP_GRAPH_DATA }));
 }
 
 async function loadGraphData() {
