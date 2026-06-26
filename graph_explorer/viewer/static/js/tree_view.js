@@ -65,24 +65,10 @@ function getAdjacencyMap() {
     return adjacency;
 }
 
-function getRootNodeIds() {
-    const inDegree = {};
-    Object.keys(GRAPH_DATA.nodes).forEach(nodeId => {
-        inDegree[nodeId] = 0;
-    });
-
-    GRAPH_DATA.edges.forEach(edge => {
-        if (inDegree[edge.target] !== undefined) {
-            inDegree[edge.target] += 1;
-        }
-    });
-
-    const roots = Object.keys(inDegree).filter(nodeId => inDegree[nodeId] === 0);
-    const allNodes = Object.keys(GRAPH_DATA.nodes);
-    const treeRoots = roots.length > 0 ? roots : allNodes;
-
-    treeRoots.sort((left, right) => getNodeName(left).localeCompare(getNodeName(right)));
-    return treeRoots;
+function getTreeTopLevelNodeIds() {
+    const nodeIds = Object.keys(GRAPH_DATA.nodes);
+    nodeIds.sort((left, right) => getNodeName(left).localeCompare(getNodeName(right)));
+    return nodeIds;
 }
 
 function escapeHtml(value) {
@@ -236,16 +222,9 @@ function createTreeNodeElement(nodeId, depth, ancestorPath, lineage) {
         toggleNode(nodeKey);
     });
 
-    const visual = getVisualizerNodeAsset(nodeId);
-    const label = document.createElement('div');
-    label.className = 'tree-node-visual graph-node-render';
-    label.style.width = `${Math.min(visual.width, 220)}px`;
-    label.style.minHeight = `${Math.min(visual.height, 120)}px`;
-    label.innerHTML = getNodeHtml(nodeId, {
-        id: nodeId,
-        name: getNodeName(nodeId),
-        attributes: node.attributes || {}
-    });
+    const label = document.createElement('span');
+    label.className = 'tree-node-name';
+    label.textContent = nodeId;
 
     row.appendChild(toggleButton);
     row.appendChild(label);
@@ -327,13 +306,7 @@ function createTreeSelectionIndicator() {
 }
 
 function updateTreeSelectionIndicator() {
-    const indicator = document.querySelector('.tree-selection-indicator');
-    if (!indicator) {
-        return;
-    }
-
-    const nextIndicator = createTreeSelectionIndicator();
-    indicator.replaceWith(nextIndicator);
+    applySelectedNodeStyles();
 }
 
 function getTooltipElement() {
@@ -395,9 +368,8 @@ function renderTreeView() {
     }
 
     content.innerHTML = '';
-    content.appendChild(createTreeSelectionIndicator());
 
-    const rootNodeIds = getRootNodeIds();
+    const rootNodeIds = getTreeTopLevelNodeIds();
     if (rootNodeIds.length === 0) {
         const empty = document.createElement('div');
         empty.className = 'tree-empty';
@@ -812,7 +784,6 @@ function applyViewport(viewport, source) {
 
 function setSelectedNode(nodeId) {
     selectedNodeId = nodeId;
-    updateTreeSelectionIndicator();
     applySelectedNodeStyles();
 }
 

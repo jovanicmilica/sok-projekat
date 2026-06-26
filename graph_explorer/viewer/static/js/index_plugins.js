@@ -45,6 +45,9 @@ function loadGraph() {
             if (typeof window.clearGraphOperationsForNewGraph === 'function') {
                 window.clearGraphOperationsForNewGraph();
             }
+            if (typeof window.refreshWorkspacesFromPayload === 'function') {
+                window.refreshWorkspacesFromPayload(data);
+            }
             if (data.visualizer_assets && typeof window.setVisualizerAssets === 'function') {
                 window.setVisualizerAssets(data.visualizer_assets);
             }

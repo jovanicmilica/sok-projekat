@@ -153,6 +153,9 @@ async function applyGraphOperations() {
     }
 
     graphOperations = data.operations || graphOperations;
+    if (typeof window.refreshWorkspacesFromPayload === 'function') {
+        window.refreshWorkspacesFromPayload(data);
+    }
     syncOperationLists();
     renderAppliedOperations();
 
@@ -188,6 +191,23 @@ async function removeOperation(index) {
         renderAppliedOperations();
         showFilterError(error.message);
     }
+}
+
+function setGraphOperationsFromServer(operations) {
+    graphOperations = Array.isArray(operations) ? operations.map(operation => ({
+        type: operation.type,
+        query: operation.query
+    })) : [];
+    syncOperationLists();
+    clearFilterError();
+    renderAppliedOperations();
+}
+
+function getGraphOperationsSnapshot() {
+    return graphOperations.map(operation => ({
+        type: operation.type,
+        query: operation.query
+    }));
 }
 
 function resetGraphOperations() {
