@@ -1,0 +1,88 @@
+.cli-terminal-container {
+    margin-top: 20px;
+    background: #080d14;
+    border: 1px solid #2a3448;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 12px 24px -14px rgba(0, 0, 0, 0.75);
+}
+
+.cli-terminal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #111925;
+    border-bottom: 1px solid #2a3448;
+    color: #ccdfff;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cli-output {
+    min-height: 150px;
+    max-height: 240px;
+    overflow: auto;
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: #d9e6ff;
+}
+
+.cli-line {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    margin-bottom: 4px;
+}
+
+.cli-line-command {
+    color: #8fc7ff;
+}
+
+.cli-line-success {
+    color: #8fffd5;
+}
+
+.cli-line-error {
+    color: #ff9aa8;
+}
+
+.cli-line-info {
+    color: #8f9bb5;
+}
+
+.cli-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #0d141f;
+    border-top: 1px solid #2a3448;
+}
+
+.cli-prompt {
+    color: #8fffd5;
+    font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    font-weight: 900;
+}
+
+#cli-command-input {
+    flex: 1;
+    min-width: 0;
+    background: #10161f;
+    border: 1px solid #2b354a;
+    border-radius: 8px;
+    color: #e3eaff;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    font-size: 0.88rem;
+}
+
+#cli-command-input:focus {
+    outline: none;
+    border-color: #6d8ae0;
+    box-shadow: 0 0 0 3px rgba(109, 138, 224, 0.16);
+}

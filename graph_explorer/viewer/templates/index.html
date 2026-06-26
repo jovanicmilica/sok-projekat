@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Viewer</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/tree_view.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=restore-tree-workspace-1" />
+    <link rel="stylesheet" href="{% static 'css/tree_view.css' %}?v=restore-tree-workspace-1" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
   </head>
   <body>
@@ -96,12 +96,25 @@
           <div class="main-view-container"></div>
         </div>
       </div>
+
+      <div class="cli-terminal-container">
+        <div class="cli-terminal-header">
+          <span>CLI Terminal</span>
+        </div>
+        <div class="cli-output" id="cli-output"></div>
+        <div class="cli-input-row">
+          <span class="cli-prompt">&gt;</span>
+          <input id="cli-command-input" type="text" placeholder="create node --id=1 --property Name=Alice" autocomplete="off" />
+          <button class="text-btn" id="cli-run-btn" type="button">Run</button>
+        </div>
+      </div>
     </div>
 
-    <script src="{% static 'js/graph_observer.js' %}"></script>
-    <script src="{% static 'js/tree_view.js' %}"></script>
-    <script src="{% static 'js/index_filters.js' %}"></script>
-    <script src="{% static 'js/index_plugins.js' %}"></script>
-    <script src="{% static 'js/index_workspace.js' %}"></script>
+    <script src="{% static 'js/graph_observer.js' %}?v=restore-tree-workspace-1"></script>
+    <script src="{% static 'js/tree_view.js' %}?v=restore-tree-workspace-1"></script>
+    <script src="{% static 'js/index_filters.js' %}?v=restore-tree-workspace-1"></script>
+    <script src="{% static 'js/index_plugins.js' %}?v=restore-tree-workspace-1"></script>
+    <script src="{% static 'js/index_workspace.js' %}?v=restore-tree-workspace-1"></script>
+    <script src="{% static 'js/index_cli.js' %}?v=restore-tree-workspace-1"></script>
   </body>
 </html>
