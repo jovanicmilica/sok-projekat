@@ -2,12 +2,12 @@ import json
 import os
 from typing import Dict, Type, List, Any
 
-from api.data_source import DataSourcePlugin
+from api.data_source_base import BaseGraphSource
 from api.models.graph import Graph
 from api.models.graph import GraphBuilder
 
 
-class JSONSource(DataSourcePlugin):
+class JSONSource(BaseGraphSource):
     """
     JSONSource is a data source plugin that provides functionality to read JSON data from a specified file path.
     Returns the data as a Graph object.
@@ -15,14 +15,11 @@ class JSONSource(DataSourcePlugin):
 
     plugin_name = "json_source"
 
-    def __init__(self, graph_builder_class: Type[GraphBuilder]):
-        self.graph_builder_class = graph_builder_class
-
     @classmethod
     def get_parameters_spec(cls) -> List[Dict[str, Any]]:
         """
         Returns the parameter specification for this plugin.
-        
+
         Returns:
             List of parameter definitions, each containing:
             - name: parameter name
@@ -73,7 +70,7 @@ class JSONSource(DataSourcePlugin):
 
         Raises:
             FileNotFoundError: if the JSON file is not found
-            json.JSONDecodeError: if the JSON file is not valid
+            ValueError: if the JSON file is not valid
             ValueError: if the JSON structure is not as expected
         """
         if not os.path.exists(json_path):
@@ -83,105 +80,21 @@ class JSONSource(DataSourcePlugin):
             with open(json_path, 'r', encoding=encoding) as f:
                 data = json.load(f)
         except json.JSONDecodeError as e:
-            raise json.JSONDecodeError(f"Invalid JSON file: {e}", e.doc, e.pos)
+            raise ValueError(f"Invalid JSON file: {e}") from e
+        except UnicodeDecodeError as e:
+            raise ValueError(
+                f"Cannot decode JSON file with encoding '{encoding}': {e}") from e
 
-        return self._build_from_dict(data, directed=directed)
+        return self._parse_data(data, directed)
 
     def parse_string(self, json_string: str, directed: bool = True) -> Graph:
-        """
-        Parse JSON string and return a Graph instance.
-
-        Args:
-            json_string: JSON string to parse
-            directed: Whether the graph should be directed or undirected
-
-        Returns:
-            Graph instance built from the JSON data
-
-        Raises:
-            json.JSONDecodeError: if the JSON string is not valid
-            ValueError: if the JSON structure is not as expected
-        """
+        """Parse JSON string and return graph."""
         try:
             data = json.loads(json_string)
         except json.JSONDecodeError as e:
-            raise json.JSONDecodeError(f"Invalid JSON string: {e}", e.doc, e.pos)
+            raise ValueError(f"Invalid JSON string: {e}") from e
 
-        return self._build_from_dict(data, directed=directed)
-
-    def _build_from_dict(self, data: Dict, directed: bool = True) -> Graph:
-        """
-        Builds a Graph instance from a dictionary representation of the graph data.
-        Expected JSON structure:
-        {
-            "nodes": [
-                {"id": "node1", "label": "Čvor 1", "weight": 10},
-                {"id": "node2", "label": "Čvor 2", "weight": 20}
-            ],
-            "edges": [
-                {"id": "edge1", "source": "node1", "target": "node2", "weight": 5}
-            ]
-        }
-
-        Args:
-            data: Dictionary containing the graph data with 'nodes' and 'edges' keys
-            directed: Whether the graph should be directed or undirected
-
-        Returns:
-            Graph instance built from the dictionary data
-
-        Raises:
-            ValueError: if the data structure is invalid (missing required fields, wrong types)
-        """
-        if not isinstance(data, dict):
-            raise ValueError("JSON must be an object of type dict")
-
-        builder = self.graph_builder_class(directed=directed)
-
-        # Add nodes
-        nodes = data.get('nodes', [])
-        if not isinstance(nodes, list):
-            raise ValueError("'nodes' must be a list")
-
-        for node_data in nodes:
-            if not isinstance(node_data, dict):
-                raise ValueError("Each node must be an object")
-
-            node_id = node_data.get('id')
-            if not node_id:
-                raise ValueError("Each node must have an 'id' field")
-
-            # Extract all other fields as properties
-            properties = {k: v for k, v in node_data.items() if k != 'id'}
-            builder.add_node(node_id, **properties)
-
-        # Add edges
-        edges = data.get('edges', [])
-        if not isinstance(edges, list):
-            raise ValueError("'edges' must be a list")
-
-        for edge_data in edges:
-            if not isinstance(edge_data, dict):
-                raise ValueError("Each edge must be an object")
-
-            edge_id = edge_data.get('id')
-            source = edge_data.get('source')
-            target = edge_data.get('target')
-
-            if not all([edge_id, source, target]):
-                raise ValueError("Each edge must have 'id', 'source', and 'target' fields")
-
-            # All other fields are considered properties of the edge
-            properties = {k: v for k, v in edge_data.items()
-                          if k not in ['id', 'source', 'target']}
-
-            builder.add_edge(edge_id, source, target, **properties)
-
-        # Build graph
-        return builder.build()
+        return self._parse_data(data, directed)
 
     def get_name(self) -> str:
-        """
-        Return the name of the data source plugin.
-        """
         return self.plugin_name
