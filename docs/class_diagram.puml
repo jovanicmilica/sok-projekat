@@ -1,0 +1,136 @@
+@startuml class_diagram
+title Graph Visualization Platform - Class Diagram
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 70
+hide empty members
+left to right direction
+
+package "api.models\n(Graph Model)" {
+    class Node {
+        + id: str
+        + attributes: dict
+        + to_json(): dict
+    }
+
+    class Edge {
+        + id: str
+        + source: str
+        + target: str
+        + attributes: dict
+        + to_json(): dict
+    }
+
+    class Graph {
+        + directed: bool
+        + nodes: dict<str, Node>
+        + edges: dict<str, Edge>
+        + add_node(node: Node): void
+        + add_edge(edge: Edge): void
+        + get_node(node_id: str): Node
+        + get_edges(): list<Edge>
+        + to_json(): dict
+        + {static} builder(directed: bool): GraphBuilder
+    }
+
+    class GraphBuilder {
+        + add_node(node_id: str, **properties): GraphBuilder
+        + add_edge(edge_id: str, source_id: str, target_id: str, **properties): GraphBuilder
+        + build(): Graph
+    }
+
+    Graph "1" *-- "many" Node
+    Graph "1" *-- "many" Edge
+    Edge --> "2" Node
+    GraphBuilder -[hidden]-> Graph
+}
+
+package "api\n(Plugin Contracts)" {
+    abstract class DataSourcePlugin {
+        + {abstract} parse(**kwargs): Graph
+        + {abstract} get_name(): str
+        + {abstract} {static} get_parameters_spec(): list<dict>
+    }
+
+    abstract class VisualizerPlugin {
+        + {abstract} render(graph: Graph): str
+        + {abstract} get_name(): str
+        + get_frontend_assets(graph: Graph): dict
+    }
+}
+
+package "plugins\n(Concrete Plugins)" {
+    class JSONSource {
+        + plugin_name = "json_source"
+        + parse(json_path: str, directed: bool, encoding: str): Graph
+        + get_name(): str
+        + {static} get_parameters_spec(): list<dict>
+    }
+
+    class YAMLSource {
+        + plugin_name = "yaml_source"
+        + parse(yaml_path: str, directed: bool, encoding: str): Graph
+        + get_name(): str
+        + {static} get_parameters_spec(): list<dict>
+    }
+
+    class SimpleVisualizer {
+        + plugin_name = "simple_visualizer"
+        + render(graph: Graph): str
+        + get_frontend_assets(graph: Graph): dict
+        + get_name(): str
+    }
+
+    class BlockVisualizer {
+        + plugin_name = "block_visualizer"
+        + render(graph: Graph): str
+        + get_frontend_assets(graph: Graph): dict
+        + get_name(): str
+    }
+}
+
+package "project_platform\n(Core Services)" {
+    class PluginManager <<Singleton>> {
+        + get_data_source_plugins(): dict
+        + get_visualizer_plugins(): dict
+        + instantiate_data_plugin(name: str, **kwargs): DataSourcePlugin
+        + get_plugin_parameters(plugin_name: str): list<dict>
+    }
+
+    class GraphOperations {
+        + search(graph: Graph, query: str): Graph
+        + filter(graph: Graph, filter_query: str): Graph
+    }
+
+    class GraphPlatform <<Singleton>> <<Facade>> {
+        + current_graph: Graph
+        + original_graph: Graph
+        + load_graph(data_source_plugin_name: str, visualizer_plugin_name: str, **parameters): Graph
+        + apply_operations(operations: list<dict>): dict
+        + execute_cli_command(command: str): dict
+        + render_current_graph(): str
+    }
+}
+
+GraphBuilder ..> Graph
+DataSourcePlugin ..> Graph
+VisualizerPlugin ..> Graph
+
+DataSourcePlugin <|.. JSONSource
+DataSourcePlugin <|.. YAMLSource
+VisualizerPlugin <|.. SimpleVisualizer
+VisualizerPlugin <|.. BlockVisualizer
+
+JSONSource ..> GraphBuilder
+YAMLSource ..> GraphBuilder
+
+GraphPlatform o-- PluginManager
+GraphPlatform o-- GraphOperations
+GraphOperations ..> Graph
+
+PluginManager ..> DataSourcePlugin
+PluginManager ..> VisualizerPlugin
+
+@enduml

@@ -103,6 +103,14 @@ graph_explorer/           Django project (the actual web app)
    ```
 6. Open the app in your browser (default: `http://127.0.0.1:8000/`).
 
+## Class Diagram
+See [`docs/class_diagram.png`](docs/class_diagram.png) (rendered image) / [`docs/class_diagram.puml`](docs/class_diagram.puml) (PlantUML source). It covers the graph model (`Node`, `Edge`, `Graph`, `GraphBuilder`), the plugin contracts (`DataSourcePlugin`, `VisualizerPlugin`), the concrete plugins (`JSONSource`, `YAMLSource`, `SimpleVisualizer`, `BlockVisualizer`), and the core services (`GraphPlatform`, `PluginManager`, `GraphOperations`).
+
+To regenerate the PNG after editing the `.puml` file (requires Java + [Graphviz](https://graphviz.org/download/), so PlantUML can lay out the arrows cleanly instead of using its slower built-in layout engine):
+```
+java -jar plantuml.jar -tpng docs/class_diagram.puml -o .
+```
+
 ## CLI Commands (inside the web UI)
 ```
 create node --id=1 --property Name=Alice --property Age=25
