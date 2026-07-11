@@ -1,0 +1,18 @@
+{
+    "nodes": [
+        {"id": "1", "name": "Ana", "label": "Ana Petrović", "type": "person", "age": 28, "height": 165, "city": "Belgrade"},
+        {"id": "2", "name": "Tom", "label": "Tom Nikolić", "type": "person", "age": 35, "height": 180, "city": "Novi Sad"},
+        {"id": "3", "name": "Milica", "label": "Milica Jovanović", "type": "person", "age": 42, "height": 170, "city": "Belgrade"},
+        {"id": "4", "name": "Petar", "label": "Petar Ilić", "type": "person", "age": 25, "height": 175, "city": "Niš"},
+        {"id": "5", "name": "Jovana", "label": "Jovana Stanković", "type": "person", "age": 31, "height": 160, "city": "Belgrade"},
+        {"id": "6", "name": "Marko", "label": "Marko Đorđević", "type": "person", "age": 45, "height": 182, "city": "Subotica"}
+    ],
+    "edges": [
+        {"id": "e1", "source": "1", "target": "2", "type": "Friend", "since": "2015-06-01"},
+        {"id": "e2", "source": "2", "target": "3", "type": "Colleague", "since": "2018-09-12"},
+        {"id": "e3", "source": "3", "target": "4", "type": "Manager", "since": "2020-01-15"},
+        {"id": "e4", "source": "4", "target": "5", "type": "Friend", "since": "2019-03-22"},
+        {"id": "e5", "source": "5", "target": "6", "type": "Colleague", "since": "2021-11-05"},
+        {"id": "e6", "source": "6", "target": "1", "type": "Friend", "since": "2017-07-30"}
+    ]
+}
